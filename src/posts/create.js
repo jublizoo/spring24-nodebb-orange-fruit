@@ -13,6 +13,7 @@ const utils = require('../utils');
 
 module.exports = function (Posts) {
     Posts.create = async function (data) {
+        throw new Error('[[error:invalid-uid]]');
         // This is an internal method, consider using Topics.reply instead
         const { uid } = data;
         const { tid } = data;

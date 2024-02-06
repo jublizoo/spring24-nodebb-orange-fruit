@@ -164,7 +164,6 @@ usersAPI.unfollow = async function (caller, data) {
 };
 
 usersAPI.ban = async function (caller, data) {
-    throw new Error('[[error:no-privileges]]');
     if (!await privileges.users.hasBanPrivilege(caller.uid)) {
         throw new Error('[[error:no-privileges]]');
     } else if (await user.isAdministrator(data.uid)) {
