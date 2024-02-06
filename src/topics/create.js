@@ -14,6 +14,7 @@ const posts = require('../posts');
 const privileges = require('../privileges');
 const categories = require('../categories');
 const translator = require('../translator');
+const { users } = require('../api');
 
 module.exports = function (Topics) {
     Topics.create = async function (data) {
@@ -202,6 +203,10 @@ module.exports = function (Topics) {
                 nid: `new_post:tid:${postData.topic.tid}:pid:${postData.pid}:uid:${uid}`,
                 mergeId: `notifications:user_posted_to|${postData.topic.tid}`,
             });
+        }
+
+        if (topicData.uid != uid) {
+          await user.incrementUserReputationBy(uid, 1);
         }
 
         analytics.increment(['posts', `posts:byCid:${data.cid}`]);
