@@ -20,14 +20,9 @@ module.exports = function (Posts) {
         const timestamp = data.timestamp || Date.now();
         const isMain = data.isMain || false;
 
-        const userFields = [
-            'uid', 'username', 'userslug', 'email', 'postcount', 'joindate', 'banned',
-            'reputation', 'picture', 'flags', 'lastonline', 'email:confirmed',
-        ];
+        let userInfo = await user.getUserField(uid, 'accounttype');
 
-        let userInfo = user.getUsersFields([uid], ['accounttype']);
-        throw new Error('hello' + JSON.stringify(userInfo));
-        if (userInfo[0].accounttype == 'student') {
+        if (userInfo == 'student') {
             throw new Error('[[error:invalid-uid]]');
         }
 
