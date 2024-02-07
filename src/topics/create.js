@@ -97,17 +97,17 @@ module.exports = function (Topics) {
             privileges.categories.can('topics:create', data.cid, uid),
             privileges.categories.can('topics:tag', data.cid, uid),
         ]);
+        
+
+        if (!categoryExists) {
+            throw new Error('[[error:no-category]]');
+        }
 
         let userInfo = await user.getUserField(uid, 'accounttype');
         let category = await categories.getCategoryData(data.cid);
         const isStudent = (userInfo == 'student');
         const isAnnouncement = (category.name == 'Announcements');
         const isStudentAnnouncement = isStudent && isAnnouncement;
-        
-
-        if (!categoryExists) {
-            throw new Error('[[error:no-category]]');
-        }
 
         if (!canCreate || isStudentAnnouncement || (!canTag && data.tags.length)) {
             throw new Error('[[error:no-privileges]]');
