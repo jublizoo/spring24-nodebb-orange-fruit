@@ -20,12 +20,6 @@ module.exports = function (Posts) {
         const timestamp = data.timestamp || Date.now();
         const isMain = data.isMain || false;
 
-        let userInfo = await user.getUserField(uid, 'accounttype');
-
-        if (userInfo == 'student') {
-            throw new Error('[[error:invalid-uid]]');
-        }
-
         if (!uid && parseInt(uid, 10) !== 0) {
             throw new Error('[[error:invalid-uid]]');
         }

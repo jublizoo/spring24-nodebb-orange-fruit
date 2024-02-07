@@ -98,11 +98,18 @@ module.exports = function (Topics) {
             privileges.categories.can('topics:tag', data.cid, uid),
         ]);
 
+        let userInfo = await user.getUserField(uid, 'accounttype');
+        let category = await categories.getCategoryData(data.cid);
+        const isStudent = (userInfo == 'student');
+        const isAnnouncement = (category.name == 'Announcements');
+        const isStudentAnnouncement = isStudent && isAnnouncement;
+        
+
         if (!categoryExists) {
             throw new Error('[[error:no-category]]');
         }
 
-        if (!canCreate || (!canTag && data.tags.length)) {
+        if (!canCreate || isStudentAnnouncement || (!canTag && data.tags.length)) {
             throw new Error('[[error:no-privileges]]');
         }
 
@@ -210,6 +217,7 @@ module.exports = function (Topics) {
         return postData;
     };
 
+    //This function adds relevant data to post data for a new post, utilizing the uid and tid from data
     async function onNewPost(postData, data) {
         const { tid } = postData;
         const { uid } = postData;
