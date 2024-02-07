@@ -36,12 +36,10 @@ describe('Topic\'s', () => {
     let adminJar;
     let csrf_token;
     let fooUid;
-    let replierUid;
 
     before(async () => {
         adminUid = await user.create({ username: 'admin', password: '123456' });
         fooUid = await user.create({ username: 'foo' });
-        replierUid = await user.create({ username: 'replier' });
         await groups.join('administrators', adminUid);
         const adminLogin = await helpers.loginUser('admin', '123456');
         adminJar = adminLogin.jar;
@@ -277,14 +275,17 @@ describe('Topic\'s', () => {
         });
 
         it('should increase user reputation when replying to a topic created by another user', async () => {
+            const createrUid = await user.create({ username: 'creator'});
+            const replierUid = await user.create({ username: 'replier' });
             const oldReputation = await user.getUserField(replierUid, 'reputation');
-            const result = await topics.post({ uid: fooUid, title: 'reputation test', content: 'main post', cid: topic.categoryId });
+            const result = await topics.post({ uid: createrUid, title: 'reputation test', content: 'main post', cid: topic.categoryId });
             const reply1 = await topics.reply({ uid: replierUid, content: 'reply post 1', tid: result.topicData.tid });
             const newReputation = await user.getUserField(replierUid, 'reputation');
             assert.strictEqual(oldReputation, newReputation - 1);
         });
 
         it('should not increase user reputation when replying to a topic created by oneself', async () => {
+          const replierUid = await user.create({ username: 'replier' });
           const oldReputation = await user.getUserField(replierUid, 'reputation');
           const result = await topics.post({ uid: replierUid, title: 'reputation test', content: 'main post', cid: topic.categoryId });
           const reply1 = await topics.reply({ uid: replierUid, content: 'reply post 1', tid: result.topicData.tid });
