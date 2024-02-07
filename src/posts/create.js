@@ -13,13 +13,23 @@ const utils = require('../utils');
 
 module.exports = function (Posts) {
     Posts.create = async function (data) {
-        throw new Error('[[error:invalid-uid]]');
         // This is an internal method, consider using Topics.reply instead
         const { uid } = data;
         const { tid } = data;
         const content = data.content.toString();
         const timestamp = data.timestamp || Date.now();
         const isMain = data.isMain || false;
+
+        const userFields = [
+            'uid', 'username', 'userslug', 'email', 'postcount', 'joindate', 'banned',
+            'reputation', 'picture', 'flags', 'lastonline', 'email:confirmed',
+        ];
+
+        let userInfo = user.getUsersFields([uid], ['accounttype']);
+        throw new Error('hello' + JSON.stringify(userInfo));
+        if (userInfo[0].accounttype == 'student') {
+            throw new Error('[[error:invalid-uid]]');
+        }
 
         if (!uid && parseInt(uid, 10) !== 0) {
             throw new Error('[[error:invalid-uid]]');
