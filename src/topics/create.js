@@ -236,7 +236,7 @@ module.exports = function (Topics) {
 
         assert.strictEqual(typeof parseInt(postData.tid, 10), 'number');
         assert.strictEqual(typeof postData.topic.title, 'string');
-        assert.strictEqual(typeof parseInt(postData.topic.pid, 10), 'number');
+        assert.strictEqual(typeof parseInt(postData.pid, 10), 'number');
         assert.strictEqual(typeof parseInt(postData.topic.tid, 10), 'number');
         return postData;
     };
