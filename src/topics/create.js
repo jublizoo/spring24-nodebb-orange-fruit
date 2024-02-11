@@ -14,6 +14,7 @@ const posts = require('../posts');
 const privileges = require('../privileges');
 const categories = require('../categories');
 const translator = require('../translator');
+const { assert } = require('../middleware');
 
 module.exports = function (Topics) {
     Topics.create = async function (data) {
@@ -155,7 +156,23 @@ module.exports = function (Topics) {
         };
     };
 
+    /*  @param data : {
+            uid : string,
+            content : string,
+            tid : string
+        }
+
+        @return postData : {
+            tid : string,
+            user : User
+            topic : {title : string, pid : string, tid : string}
+        }
+    */
     Topics.reply = async function (data) {
+        assert(typeof data.uid === 'string');
+        assert(typeof data.content === 'string');
+        assert(typeof data.tid === 'string');
+
         data = await plugins.hooks.fire('filter:topic.reply', data);
         const { tid } = data;
         const { uid } = data;
@@ -211,6 +228,10 @@ module.exports = function (Topics) {
         analytics.increment(['posts', `posts:byCid:${data.cid}`]);
         plugins.hooks.fire('action:topic.reply', { post: _.clone(postData), data: data });
 
+        assert(typeof postData.tid === 'string');
+        assert(typeof postData.topic.title === 'string');
+        assert(typeof postData.topic.pid === 'string');
+        assert(typeof postData.topic.tid === 'string');
         return postData;
     };
 
