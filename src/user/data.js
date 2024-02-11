@@ -116,18 +116,19 @@ module.exports = function (User) {
         const uidToUser = _.zipObject(uniqueUids, usersData);
         const users = uids.map((uid) => {
             const user = uidToUser[uid] || { ...User.guestData };
-            // if (!parseInt(user.uid, 10)) {
-            //     user.username = (user.hasOwnProperty('oldUid') && parseInt(user.oldUid, 10)) ? '[[global:former_user]]' : '[[global:guest]]';
-            //     user.displayname = 'bonobo'; // user.username;
-            // }
-
-            user.username = user.username;
-            if (user.reputation > 1) {
-                user.displayname = user.username + ' ✅';
+            if (!parseInt(user.uid, 10)) {
+                user.username = (user.hasOwnProperty('oldUid') && parseInt(user.oldUid, 10)) ? '[[global:former_user]]' : '[[global:guest]]';
+                user.displayname = user.username;
             }
 
             else {
-                user.displayname = user.username;
+                if (user.reputation > 1) {
+                    user.displayname = user.username + ' ✅';
+                }
+    
+                else {
+                    user.displayname = user.username;
+                }    
             }
 
             return user;
@@ -248,8 +249,6 @@ module.exports = function (User) {
                     bgColor = Array.prototype.reduce.call(user.username, (cur, next) => cur + next.charCodeAt(), 0);
                     bgColor = iconBackgrounds[bgColor % iconBackgrounds.length];
                 }
-                // user['icon:text'] = (user.username[0] || '').toUpperCase();
-                
                 user['icon:text'] = (user.username[0] || '').toUpperCase();
                 user['icon:bgColor'] = bgColor;
             }
