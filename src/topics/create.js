@@ -3,6 +3,7 @@
 
 const _ = require('lodash');
 
+const assert = require('assert');
 const db = require('../database');
 const utils = require('../utils');
 const slugify = require('../slugify');
@@ -14,7 +15,6 @@ const posts = require('../posts');
 const privileges = require('../privileges');
 const categories = require('../categories');
 const translator = require('../translator');
-const { assert } = require('../middleware');
 
 module.exports = function (Topics) {
     Topics.create = async function (data) {
@@ -157,21 +157,27 @@ module.exports = function (Topics) {
     };
 
     /*  @param data : {
-            uid : string,
+            uid : number,
             content : string,
-            tid : string
+            tid : number,
+            cid : number,
+            fromQueue? : boolean,
+            timestamp: number | Date,
+            ip : string,
         }
 
         @return postData : {
-            tid : string,
+            tid : number,
             user : User
-            topic : {title : string, pid : string, tid : string}
+            topic : {title : string, pid : number, tid : number}
         }
     */
     Topics.reply = async function (data) {
-        assert(typeof data.uid === 'string');
-        assert(typeof data.content === 'string');
-        assert(typeof data.tid === 'string');
+        assert.strictEqual(typeof parseInt(data.uid, 10), 'number');
+        assert.strictEqual(typeof data.content, 'string');
+        assert.strictEqual(typeof parseInt(data.tid, 10), 'number');
+        assert.strictEqual(typeof parseInt(data.cid, 10), 'number');
+        assert.strictEqual(typeof parseInt(data.timestamp, 10), 'number');
 
         data = await plugins.hooks.fire('filter:topic.reply', data);
         const { tid } = data;
@@ -228,10 +234,10 @@ module.exports = function (Topics) {
         analytics.increment(['posts', `posts:byCid:${data.cid}`]);
         plugins.hooks.fire('action:topic.reply', { post: _.clone(postData), data: data });
 
-        assert(typeof postData.tid === 'string');
-        assert(typeof postData.topic.title === 'string');
-        assert(typeof postData.topic.pid === 'string');
-        assert(typeof postData.topic.tid === 'string');
+        assert.strictEqual(typeof parseInt(postData.tid, 10), 'number');
+        assert.strictEqual(typeof postData.topic.title, 'string');
+        assert.strictEqual(typeof parseInt(postData.topic.pid, 10), 'number');
+        assert.strictEqual(typeof parseInt(postData.topic.tid, 10), 'number');
         return postData;
     };
 
