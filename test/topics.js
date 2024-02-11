@@ -275,7 +275,7 @@ describe('Topic\'s', () => {
         });
 
         it('should increase user reputation when replying to a topic created by another user', async () => {
-            const createrUid = await user.create({ username: 'creator'});
+            const createrUid = await user.create({ username: 'creator' });
             const replierUid = await user.create({ username: 'replier' });
             const oldReputation = await user.getUserField(replierUid, 'reputation');
             const result = await topics.post({ uid: createrUid, title: 'reputation test', content: 'main post', cid: topic.categoryId });
@@ -285,13 +285,13 @@ describe('Topic\'s', () => {
         });
 
         it('should not increase user reputation when replying to a topic created by oneself', async () => {
-          const replierUid = await user.create({ username: 'replier' });
-          const oldReputation = await user.getUserField(replierUid, 'reputation');
-          const result = await topics.post({ uid: replierUid, title: 'reputation test', content: 'main post', cid: topic.categoryId });
-          const reply1 = await topics.reply({ uid: replierUid, content: 'reply post 1', tid: result.topicData.tid });
-          const newReputation = await user.getUserField(replierUid, 'reputation');
-          assert.strictEqual(oldReputation, newReputation);
-      });
+            const replierUid = await user.create({ username: 'replier' });
+            const oldReputation = await user.getUserField(replierUid, 'reputation');
+            const result = await topics.post({ uid: replierUid, title: 'reputation test', content: 'main post', cid: topic.categoryId });
+            const reply1 = await topics.reply({ uid: replierUid, content: 'reply post 1', tid: result.topicData.tid });
+            const newReputation = await user.getUserField(replierUid, 'reputation');
+            assert.strictEqual(oldReputation, newReputation);
+        });
 
         it('should handle direct replies', (done) => {
             topics.reply({ uid: topic.userId, content: 'test reply', tid: newTopic.tid, toPid: newPost.pid }, (err, result) => {
