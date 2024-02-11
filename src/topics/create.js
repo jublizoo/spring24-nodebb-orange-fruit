@@ -76,6 +76,42 @@ module.exports = function (Topics) {
         return topicData.tid;
     };
 
+    /*  @param data : {
+            uid : number,
+            title: string,
+            tags? : string[],
+            content : string,
+            tid : number,
+            cid : number,
+            fromQueue? : boolean,
+            ip : string,
+            req? : {ip : string}
+        }
+        @return {
+            postData : {
+                ip : string
+                tid : number,
+                user : User,
+                index: number,
+                isMain : boolean,
+                topic : {title : string, pid : number, tid : number}
+            }, 
+            topicData : {
+                index : number,
+                cid : number,
+                unreplied : boolean,
+                mainPost : {
+                    ip : string
+                    tid : number,
+                    user : User,
+                    index: number,
+                    isMain : boolean,
+                    topic : {title : string, pid : number, tid : number}
+                },
+                scheduled : boolean
+            }
+        }
+    */
     Topics.post = async function (data) {
         data = await plugins.hooks.fire('filter:topic.post', data);
         const { uid } = data;
@@ -103,6 +139,8 @@ module.exports = function (Topics) {
             throw new Error('[[error:no-category]]');
         }
 
+        assert.strictlyEqual(typeof uid, 'number');
+        assert.strictlyEqual(typeof data.cid, 'number');
         const userInfo = await user.getUserField(uid, 'accounttype');
         const category = await categories.getCategoryData(data.cid);
         const isStudent = (userInfo === 'student');
@@ -217,7 +255,7 @@ module.exports = function (Topics) {
         return postData;
     };
 
-    // jThis function adds relevant data to post data for a new post, utilizing the uid and tid from data
+    // This function adds relevant data to post data for a new post, utilizing the uid and tid from data
     async function onNewPost(postData, data) {
         const { tid } = postData;
         const { uid } = postData;
