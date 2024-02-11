@@ -121,14 +121,8 @@ module.exports = function (User) {
                 user.displayname = user.username;
             }
 
-            else {
-                if (user.reputation > 1) {
-                    user.displayname = user.username + ' ✅';
-                }
-    
-                else {
-                    user.displayname = user.username;
-                }    
+            if (user.reputation > 1) {
+                user.displayname = `${user.username} ✅`;
             }
 
             return user;
