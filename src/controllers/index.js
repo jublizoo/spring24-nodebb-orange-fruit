@@ -3,11 +3,13 @@
 const nconf = require('nconf');
 const validator = require('validator');
 
+const { assert } = require('console');
 const meta = require('../meta');
 const user = require('../user');
 const plugins = require('../plugins');
 const privileges = require('../privileges');
 const helpers = require('./helpers');
+
 
 const Controllers = module.exports;
 
@@ -141,6 +143,10 @@ Controllers.login = async function (req, res) {
 };
 
 Controllers.register = async function (req, res, next) {
+    // Controllers.register = async function (req: Request, res: Response, next: NextFunction) : void
+    assert(typeof req === 'object');
+    assert(typeof res === 'object');
+    assert(typeof next === 'object');
     const registrationType = meta.config.registrationType || 'normal';
 
     if (registrationType === 'disabled') {
@@ -199,6 +205,7 @@ Controllers.register = async function (req, res, next) {
     } catch (err) {
         next(err);
     }
+    //returns void type, no need to check
 };
 
 Controllers.registerInterstitial = async function (req, res, next) {
