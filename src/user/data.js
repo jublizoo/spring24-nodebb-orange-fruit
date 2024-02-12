@@ -4,6 +4,7 @@ const validator = require('validator');
 const nconf = require('nconf');
 const _ = require('lodash');
 
+const assert = require('assert');
 const db = require('../database');
 const meta = require('../meta');
 const plugins = require('../plugins');
@@ -112,7 +113,32 @@ module.exports = function (User) {
         }
     }
 
+    // userData : {
+    //     uid: number,
+    //     username: string,
+    //     displayname: string,
+    //     userslug: string,
+    //     fullname: string,
+    //     email: string,
+    //     'icon:text': string,
+    //     'icon:bgColor': string,
+    //     groupTitle: string,
+    //     groupTitleArray: string[],
+    //     status: string,
+    //     reputation: number,
+    //     'email:confirmed': number,
+    // };
+    // (uids: number[]) * (uniqueUids: number[]) * (usersData: userData[]) -> (users: userData[])
     function uidsToUsers(uids, uniqueUids, usersData) {
+        // assert.strictEqual(typeof uids, 'object');
+        // assert.strictEqual(typeof uniqueUids, 'object');
+        // assert.strictEqual(typeof usersData, 'object');
+
+        // if (uids.length !== 0) {
+        //     assert.strictEqual(typeof parseInt(uids[0], 10), 'number');
+        //     assert.strictEqual(typeof parseInt(uniqueUids[0], 10), 'number');
+        // }
+
         const uidToUser = _.zipObject(uniqueUids, usersData);
         const users = uids.map((uid) => {
             const user = uidToUser[uid] || { ...User.guestData };
@@ -121,12 +147,13 @@ module.exports = function (User) {
                 user.displayname = user.username;
             }
 
-            if (user.reputation > 1) {
+            if (meta.config.showReputationBadge && user.reputation > meta.config.minReputationBadge) {
                 user.displayname = `${user.username} ✅`;
             }
 
             return user;
         });
+        // assert.strictEqual(typeof users, 'object');
         return users;
     }
 
