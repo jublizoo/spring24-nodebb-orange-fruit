@@ -205,7 +205,7 @@ Controllers.register = async function (req, res, next) {
     } catch (err) {
         next(err);
     }
-    //returns void type, no need to check
+    // returns void type, no need to check
 };
 
 Controllers.registerInterstitial = async function (req, res, next) {
