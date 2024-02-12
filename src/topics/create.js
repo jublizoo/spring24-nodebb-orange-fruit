@@ -14,6 +14,7 @@ const posts = require('../posts');
 const privileges = require('../privileges');
 const categories = require('../categories');
 const translator = require('../translator');
+const assert = require('assert');
 
 module.exports = function (Topics) {
     Topics.create = async function (data) {
@@ -77,12 +78,12 @@ module.exports = function (Topics) {
     };
 
     /*  @param data : {
-            uid : number,
+            uid : string,
             title: string,
             tags? : string[],
             content : string,
-            tid : number,
-            cid : number,
+            tid : string,
+            cid : string,
             fromQueue? : boolean,
             ip : string,
             req? : {ip : string}
@@ -90,29 +91,51 @@ module.exports = function (Topics) {
         @return {
             postData : {
                 ip : string
-                tid : number,
+                tid : string,
                 user : User,
                 index: number,
                 isMain : boolean,
                 topic : {title : string, pid : number, tid : number}
-            }, 
+            },
             topicData : {
                 index : number,
-                cid : number,
+                cid : string,
                 unreplied : boolean,
                 mainPost : {
                     ip : string
-                    tid : number,
+                    tid : string,
                     user : User,
                     index: number,
                     isMain : boolean,
-                    topic : {title : string, pid : number, tid : number}
+                    topic : {title : string, pid : string, tid : string }
                 },
                 scheduled : boolean
             }
         }
     */
     Topics.post = async function (data) {
+        //Ensure input types are correct
+        console.log('1');
+        assert.strictEqual(typeof data.uid, 'string');
+        console.log('2');
+        assert.strictEqual(typeof data.title, 'string');
+        console.log('3');
+        if (data.tags)
+            assert.strictEqual(typeof data.tags, 'string[]');
+        console.log('4');
+        assert.strictEqual(typeof data.content, 'string');
+        console.log('5');
+        assert.strictEqual(typeof data.tid, 'string');
+        console.log('6');
+        assert.strictEqual(typeof data.cid, 'string');
+        console.log('7');
+        assert.strictEqual(typeof data.fromQueue, 'boolean');
+        console.log('8');
+        assert.strictEqual(typeof data.ip, 'string');
+        console.log('9');
+        if (data.req)
+            assert.strictEqual(typeof data.req.ip, 'string');
+
         data = await plugins.hooks.fire('filter:topic.post', data);
         const { uid } = data;
 
@@ -138,11 +161,17 @@ module.exports = function (Topics) {
         if (!categoryExists) {
             throw new Error('[[error:no-category]]');
         }
-
-        assert.strictlyEqual(typeof uid, 'number');
-        assert.strictlyEqual(typeof data.cid, 'number');
+        
+        assert.strictEqual(typeof uid, 'number');
+        assert.strictEqual(typeof data.cid, 'string');
+        
         const userInfo = await user.getUserField(uid, 'accounttype');
         const category = await categories.getCategoryData(data.cid);
+
+        assert.strictEqual(typeof userInfo, 'string');
+        console.assert(category.hasOwnProperty('name'));
+        assert.strictEqual(typeof category.name, 'string');
+
         const isStudent = (userInfo === 'student');
         const isAnnouncement = (category.name === 'Announcements');
         const isStudentAnnouncement = isStudent && isAnnouncement;
