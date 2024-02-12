@@ -4,7 +4,7 @@ const validator = require('validator');
 const nconf = require('nconf');
 const _ = require('lodash');
 
-const assert = require('assert');
+// const assert = require('assert');
 const db = require('../database');
 const meta = require('../meta');
 const plugins = require('../plugins');
