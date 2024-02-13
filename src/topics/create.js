@@ -47,7 +47,7 @@ module.exports = function (Topics) {
         const timestampedSortedSetKeys = [
             'topics:tid',
             `cid:${topicData.cid}:tids`,
-            `cid:${topicData.cid}:uid:${topicData.uid}:tids`,
+         `cid:${topicData.cid}:uid:${topicData.uid}:tids`,
         ];
 
         const scheduled = timestamp > Date.now();
@@ -78,63 +78,50 @@ module.exports = function (Topics) {
     };
 
     /*  @param data : {
-            uid : string,
+            uid : string | number
             title: string,
             tags? : string[],
             content : string,
-            tid : string,
-            cid : string,
+            cid : string | number
             fromQueue? : boolean,
-            ip : string,
             req? : {ip : string}
         }
         @return {
             postData : {
                 ip : string
-                tid : string,
+                tid : number,
                 user : User,
                 index: number,
                 isMain : boolean,
-                topic : {title : string, pid : number, tid : number}
             },
             topicData : {
                 index : number,
-                cid : string,
+                cid : number,
                 unreplied : boolean,
-                mainPost : {
-                    ip : string
-                    tid : string,
+                mainPost? : {
+                    ip? : string
+                    tid : number,
                     user : User,
                     index: number,
                     isMain : boolean,
-                    topic : {title : string, pid : string, tid : string }
                 },
                 scheduled : boolean
             }
         }
     */
     Topics.post = async function (data) {
-        //Ensure input types are correct
-        console.log('1');
-        assert.strictEqual(typeof data.uid, 'string');
-        console.log('2');
-        assert.strictEqual(typeof data.title, 'string');
-        console.log('3');
-        if (data.tags)
-            assert.strictEqual(typeof data.tags, 'string[]');
-        console.log('4');
-        assert.strictEqual(typeof data.content, 'string');
-        console.log('5');
-        assert.strictEqual(typeof data.tid, 'string');
-        console.log('6');
-        assert.strictEqual(typeof data.cid, 'string');
-        console.log('7');
-        assert.strictEqual(typeof data.fromQueue, 'boolean');
-        console.log('8');
-        assert.strictEqual(typeof data.ip, 'string');
-        console.log('9');
-        if (data.req)
-            assert.strictEqual(typeof data.req.ip, 'string');
+        /*
+         * Ensure input types are correct. Some inputs change types across calls.
+         * Certain errors are expected when required data is not given, hence
+         * the option for types to be null/invalid in the type assertions.
+         */
+        assert(!data.uid || typeof data.uid === 'number' || typeof data.uid === 'string');
+        assert(!data.title || typeof data.title === 'string');
+        assert(!data.tags || typeof data.tags === 'object');
+        assert(!data.content || typeof data.content === 'string');
+        assert(!data.cid ||typeof data.cid === 'number' || typeof data.cid === 'string');
+        assert(!data.fromQueue || typeof data.fromQueue === 'boolean');
+        assert(!data.req || !data.req.ip || typeof data.req.ip === 'string');
 
         data = await plugins.hooks.fire('filter:topic.post', data);
         const { uid } = data;
@@ -162,20 +149,24 @@ module.exports = function (Topics) {
             throw new Error('[[error:no-category]]');
         }
         
-        assert.strictEqual(typeof uid, 'number');
-        assert.strictEqual(typeof data.cid, 'string');
         
-        const userInfo = await user.getUserField(uid, 'accounttype');
-        const category = await categories.getCategoryData(data.cid);
 
-        assert.strictEqual(typeof userInfo, 'string');
-        console.assert(category.hasOwnProperty('name'));
-        assert.strictEqual(typeof category.name, 'string');
+        let isStudentAnnouncement = false;
+        if (uid && user.exists(uid)) {
+            const userInfo = await user.getUserField(uid, 'accounttype');
+            const category = await categories.getCategoryData(data.cid);
 
-        const isStudent = (userInfo === 'student');
-        const isAnnouncement = (category.name === 'Announcements');
-        const isStudentAnnouncement = isStudent && isAnnouncement;
-
+            assert(typeof userInfo === 'string');
+            assert(category.hasOwnProperty('name'));
+            assert(typeof category.name === 'string');
+            
+            const isStudent = (userInfo === 'student');
+            const isAnnouncement = (category.name === 'Announcements');
+            isStudentAnnouncement = isStudent && isAnnouncement;
+        }
+        
+                    
+        
         if (!canCreate || isStudentAnnouncement || (!canTag && data.tags.length)) {
             throw new Error('[[error:no-privileges]]');
         }
@@ -222,11 +213,29 @@ module.exports = function (Topics) {
         if (parseInt(uid, 10) && !topicData.scheduled) {
             user.notifications.sendTopicNotificationToFollowers(uid, topicData, postData);
         }
+        
+        
+        assert(!postData.ip || typeof postData.ip === 'string');
+        assert(typeof postData.tid === 'number');
+        assert(typeof postData.user === 'object');
+        assert(typeof postData.index === 'number');
+        assert(typeof postData.isMain === 'boolean');
+        assert(typeof topicData.index === 'number');
+        assert(typeof topicData.cid === 'number');
+        assert(typeof topicData.unreplied === 'boolean');
+        assert(!topicData.mainPost.ip || typeof topicData.mainPost.ip === 'string');
+        assert(typeof topicData.mainPost.tid === 'number');
+        assert(typeof topicData.mainPost.user === 'object');
+        assert(typeof topicData.mainPost.index === 'number');
+        assert(typeof topicData.mainPost.isMain === 'boolean');
+        assert(typeof topicData.scheduled === 'boolean');
+        
 
         return {
             topicData: topicData,
             postData: postData,
         };
+        
     };
 
     Topics.reply = async function (data) {
