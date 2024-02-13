@@ -51,7 +51,7 @@ describe('Topic\'s', () => {
             name: 'Announcements',
             description: 'Irrelevant',
         });
-        
+
         generalObj = await categories.create({
             name: 'General',
             description: 'Irrelevant',
@@ -113,8 +113,8 @@ describe('Topic\'s', () => {
                 done();
             });
         });
-        
-        let studentUser = User.create({
+
+        const studentUser = User.create({
             username: 'student1',
             password: 'pass',
             userslug: 'student1',
@@ -122,10 +122,10 @@ describe('Topic\'s', () => {
             email: 'student@gmail.com',
             joindate: null,
             lastonline: null,
-            status: 'online'
+            status: 'online',
         });
 
-        let teacherUser = User.create({
+        const teacherUser = User.create({
             username: 'teacher1',
             password: 'pass',
             userslug: 'teacher1',
@@ -133,20 +133,30 @@ describe('Topic\'s', () => {
             email: 'teacher@gmail.com',
             joindate: null,
             lastonline: null,
-            status: 'online'
+            status: 'online',
         });
 
         await helpers.loginUser('student1', 'pass');
 
         it('should fail to create new topic in announcements when the user is a student', (done) => {
-            topics.post({ uid: studentUser.uid, title: topic.title, content: topic.content, cid: announcementObj.cid}, (err) => {
+            topics.post({
+                uid: studentUser.uid,
+                title: topic.title,
+                content: topic.content,
+                cid: announcementObj.cid,
+            }, (err) => {
                 assert.equal(err.message, '[[error:no-privileges]]');
                 done();
             });
         });
-        
+
         it('should be able to create a new topic in general when the user is a student', (done) => {
-            topics.post({ uid: studentUser.uid, title: topic.title, content: topic.content, cid: generalObj.cid}, (err) => {
+            topics.post({
+                uid: studentUser.uid,
+                title: topic.title,
+                content: topic.content,
+                cid: generalObj.cid,
+            }, (err) => {
                 assert.ifError(err);
                 done();
             });
@@ -155,7 +165,12 @@ describe('Topic\'s', () => {
         await helpers.loginUser('teacher1', 'pass');
 
         it('should be able to create a new topic in announcements when the user is a teacher', (done) => {
-            topics.post({ uid: teacherUser.uid, title: topic.title, content: topic.content, cid: generalObj.cid}, (err) => {
+            topics.post({
+                uid: teacherUser.uid,
+                title: topic.title,
+                content: topic.content,
+                cid: generalObj.cid,
+            }, (err) => {
                 assert.ifError(err);
                 done();
             });

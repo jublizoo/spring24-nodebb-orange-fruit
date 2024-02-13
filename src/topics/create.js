@@ -2,7 +2,7 @@
 'use strict';
 
 const _ = require('lodash');
-
+const assert = require('assert');
 const db = require('../database');
 const utils = require('../utils');
 const slugify = require('../slugify');
@@ -14,7 +14,7 @@ const posts = require('../posts');
 const privileges = require('../privileges');
 const categories = require('../categories');
 const translator = require('../translator');
-const assert = require('assert');
+
 
 module.exports = function (Topics) {
     Topics.create = async function (data) {
@@ -47,7 +47,7 @@ module.exports = function (Topics) {
         const timestampedSortedSetKeys = [
             'topics:tid',
             `cid:${topicData.cid}:tids`,
-         `cid:${topicData.cid}:uid:${topicData.uid}:tids`,
+            `cid:${topicData.cid}:uid:${topicData.uid}:tids`,
         ];
 
         const scheduled = timestamp > Date.now();
@@ -119,7 +119,7 @@ module.exports = function (Topics) {
         assert(!data.title || typeof data.title === 'string');
         assert(!data.tags || typeof data.tags === 'object');
         assert(!data.content || typeof data.content === 'string');
-        assert(!data.cid ||typeof data.cid === 'number' || typeof data.cid === 'string');
+        assert(!data.cid || typeof data.cid === 'number' || typeof data.cid === 'string');
         assert(!data.fromQueue || typeof data.fromQueue === 'boolean');
         assert(!data.req || !data.req.ip || typeof data.req.ip === 'string');
 
@@ -148,8 +148,6 @@ module.exports = function (Topics) {
         if (!categoryExists) {
             throw new Error('[[error:no-category]]');
         }
-        
-        
 
         let isStudentAnnouncement = false;
         if (uid && user.exists(uid)) {
@@ -159,14 +157,12 @@ module.exports = function (Topics) {
             assert(typeof userInfo === 'string');
             assert(category.hasOwnProperty('name'));
             assert(typeof category.name === 'string');
-            
+
             const isStudent = (userInfo === 'student');
             const isAnnouncement = (category.name === 'Announcements');
             isStudentAnnouncement = isStudent && isAnnouncement;
         }
-        
-                    
-        
+
         if (!canCreate || isStudentAnnouncement || (!canTag && data.tags.length)) {
             throw new Error('[[error:no-privileges]]');
         }
@@ -213,8 +209,7 @@ module.exports = function (Topics) {
         if (parseInt(uid, 10) && !topicData.scheduled) {
             user.notifications.sendTopicNotificationToFollowers(uid, topicData, postData);
         }
-        
-        
+
         assert(!postData.ip || typeof postData.ip === 'string');
         assert(typeof postData.tid === 'number');
         assert(typeof postData.user === 'object');
@@ -229,13 +224,11 @@ module.exports = function (Topics) {
         assert(typeof topicData.mainPost.index === 'number');
         assert(typeof topicData.mainPost.isMain === 'boolean');
         assert(typeof topicData.scheduled === 'boolean');
-        
 
         return {
             topicData: topicData,
             postData: postData,
         };
-        
     };
 
     Topics.reply = async function (data) {
