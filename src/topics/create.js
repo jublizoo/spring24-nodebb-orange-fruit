@@ -3,6 +3,7 @@
 
 const _ = require('lodash');
 
+const assert = require('assert');
 const db = require('../database');
 const utils = require('../utils');
 const slugify = require('../slugify');
@@ -155,7 +156,29 @@ module.exports = function (Topics) {
         };
     };
 
+    /*  @param data : {
+            uid : number,
+            content : string,
+            tid : number,
+            cid : number,
+            fromQueue? : boolean,
+            timestamp: number | Date,
+            ip : string,
+        }
+
+        @return postData : {
+            tid : number,
+            user : User
+            topic : {title : string, pid : number, tid : number}
+        }
+    */
     Topics.reply = async function (data) {
+        assert.strictEqual(typeof parseInt(data.uid, 10), 'number');
+        assert.strictEqual(typeof data.content, 'string');
+        assert.strictEqual(typeof parseInt(data.tid, 10), 'number');
+        assert.strictEqual(typeof parseInt(data.cid, 10), 'number');
+        assert.strictEqual(typeof parseInt(data.timestamp, 10), 'number');
+
         data = await plugins.hooks.fire('filter:topic.reply', data);
         const { tid } = data;
         const { uid } = data;
@@ -204,9 +227,17 @@ module.exports = function (Topics) {
             });
         }
 
+        if (topicData.uid !== uid) {
+            await user.incrementUserReputationBy(uid, 1);
+        }
+
         analytics.increment(['posts', `posts:byCid:${data.cid}`]);
         plugins.hooks.fire('action:topic.reply', { post: _.clone(postData), data: data });
 
+        assert.strictEqual(typeof parseInt(postData.tid, 10), 'number');
+        assert.strictEqual(typeof postData.topic.title, 'string');
+        assert.strictEqual(typeof parseInt(postData.pid, 10), 'number');
+        assert.strictEqual(typeof parseInt(postData.topic.tid, 10), 'number');
         return postData;
     };
 
