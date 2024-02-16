@@ -18,7 +18,7 @@ const posts = require('../src/posts');
 const categories = require('../src/categories');
 const privileges = require('../src/privileges');
 const meta = require('../src/meta');
-const User = require('../src/user');
+const user = require('../src/user');
 const groups = require('../src/groups');
 const helpers = require('./helpers');
 const socketPosts = require('../src/socket.io/posts');
@@ -40,8 +40,8 @@ describe('Topic\'s', () => {
     let generalObj;
 
     before(async () => {
-        adminUid = await User.create({ username: 'admin', password: '123456' });
-        fooUid = await User.create({ username: 'foo' });
+        adminUid = await user.create({ username: 'admin', password: '123456' });
+        fooUid = await user.create({ username: 'foo' });
         await groups.join('administrators', adminUid);
         const adminLogin = await helpers.loginUser('admin', '123456');
         adminJar = adminLogin.jar;
@@ -349,6 +349,25 @@ describe('Topic\'s', () => {
 
                 done();
             });
+        });
+
+        it('should increase user reputation when replying to a topic created by another user', async () => {
+            const createrUid = await user.create({ username: 'creator' });
+            const replierUid = await user.create({ username: 'replier' });
+            const oldReputation = await user.getUserField(replierUid, 'reputation');
+            const result = await topics.post({ uid: createrUid, title: 'reputation test', content: 'main post', cid: topic.categoryId });
+            const reply1 = await topics.reply({ uid: replierUid, content: 'reply post 1', tid: result.topicData.tid });
+            const newReputation = await user.getUserField(replierUid, 'reputation');
+            assert.strictEqual(oldReputation, newReputation - 1);
+        });
+
+        it('should not increase user reputation when replying to a topic created by oneself', async () => {
+            const replierUid = await user.create({ username: 'replier' });
+            const oldReputation = await user.getUserField(replierUid, 'reputation');
+            const result = await topics.post({ uid: replierUid, title: 'reputation test', content: 'main post', cid: topic.categoryId });
+            const reply1 = await topics.reply({ uid: replierUid, content: 'reply post 1', tid: result.topicData.tid });
+            const newReputation = await user.getUserField(replierUid, 'reputation');
+            assert.strictEqual(oldReputation, newReputation);
         });
 
         it('should handle direct replies', (done) => {
@@ -702,7 +721,7 @@ describe('Topic\'s', () => {
                     });
                 },
                 function (next) {
-                    User.create({ username: 'topicFollower', password: '123456' }, next);
+                    user.create({ username: 'topicFollower', password: '123456' }, next);
                 },
                 function (_uid, next) {
                     followerUid = _uid;
@@ -911,7 +930,7 @@ describe('Topic\'s', () => {
                 cid: categoryObj.cid,
             });
             const tid1 = topic1.topicData.tid;
-            const globalModUid = await User.create({ username: 'global mod' });
+            const globalModUid = await user.create({ username: 'global mod' });
             await groups.join('Global Moderators', globalModUid);
             await privileges.categories.rescind(['groups:purge'], categoryObj.cid, 'Global Moderators');
             try {
@@ -1547,7 +1566,7 @@ describe('Topic\'s', () => {
                     topics.post({ uid: topic.userId, title: 'unread topic', content: 'unread topic content', cid: topic.categoryId }, next);
                 },
                 joeUid: function (next) {
-                    User.create({ username: 'regularJoe' }, next);
+                    user.create({ username: 'regularJoe' }, next);
                 },
             }, (err, results) => {
                 assert.ifError(err);
@@ -1612,10 +1631,10 @@ describe('Topic\'s', () => {
             await apiTopics.follow({ uid: adminUid }, { tid: tid });
             const data = await topics.reply({ uid: uid, timestamp: Date.now(), content: 'some content', tid: tid });
             await sleep(2500);
-            let count = await User.notifications.getUnreadCount(adminUid);
+            let count = await user.notifications.getUnreadCount(adminUid);
             assert.strictEqual(count, 1);
             await socketTopics.markTopicNotificationsRead({ uid: adminUid }, [tid]);
-            count = await User.notifications.getUnreadCount(adminUid);
+            count = await user.notifications.getUnreadCount(adminUid);
             assert.strictEqual(count, 0);
         });
 
@@ -1757,7 +1776,7 @@ describe('Topic\'s', () => {
                 },
                 function (data, next) {
                     tid = data.topicData.tid;
-                    User.ignoreCategory(uid, ignoredCid, next);
+                    user.ignoreCategory(uid, ignoredCid, next);
                 },
                 function (next) {
                     topics.getUnreadTids({ uid: uid }, next);
@@ -1779,11 +1798,11 @@ describe('Topic\'s', () => {
                 },
                 function (result, next) {
                     topic = result.topicData;
-                    User.create({ username: 'blockedunread' }, next);
+                    user.create({ username: 'blockedunread' }, next);
                 },
                 function (uid, next) {
                     blockedUid = uid;
-                    User.blocks.add(uid, adminUid, next);
+                    user.blocks.add(uid, adminUid, next);
                 },
                 function (next) {
                     topics.reply({ uid: blockedUid, content: 'post from blocked user', tid: topic.tid }, next);
@@ -1793,13 +1812,13 @@ describe('Topic\'s', () => {
                 },
                 function (unreadTids, next) {
                     assert(!unreadTids.includes(topic.tid));
-                    User.blocks.remove(blockedUid, adminUid, next);
+                    user.blocks.remove(blockedUid, adminUid, next);
                 },
             ], done);
         });
 
         it('should not return topic as unread if topic is deleted', async () => {
-            const uid = await User.create({ username: 'regularJoe' });
+            const uid = await user.create({ username: 'regularJoe' });
             const result = await topics.post({ uid: adminUid, title: 'deleted unread', content: 'not unread', cid: categoryObj.cid });
             await topics.delete(result.topicData.tid, adminUid);
             const unreadTids = await topics.getUnreadTids({ cid: 0, uid: uid });
@@ -2236,7 +2255,7 @@ describe('Topic\'s', () => {
         let tid;
         let followerUid;
         before((done) => {
-            User.create({ username: 'follower' }, (err, uid) => {
+            user.create({ username: 'follower' }, (err, uid) => {
                 if (err) {
                     return done(err);
                 }
@@ -2434,11 +2453,11 @@ describe('Topic\'s', () => {
             let blockedUid;
             async.waterfall([
                 function (next) {
-                    User.create({ username: 'blocked' }, next);
+                    user.create({ username: 'blocked' }, next);
                 },
                 function (uid, next) {
                     blockedUid = uid;
-                    User.blocks.add(uid, adminUid, next);
+                    user.blocks.add(uid, adminUid, next);
                 },
                 function (next) {
                     topics.reply({ uid: blockedUid, content: 'post from blocked user', tid: topic2.topicData.tid }, next);
@@ -2448,7 +2467,7 @@ describe('Topic\'s', () => {
                 },
                 function (teaser, next) {
                     assert.equal(teaser.content, 'content 2');
-                    User.blocks.remove(blockedUid, adminUid, next);
+                    user.blocks.remove(blockedUid, adminUid, next);
                 },
             ], done);
         });
@@ -2460,7 +2479,7 @@ describe('Topic\'s', () => {
         before((done) => {
             async.waterfall([
                 function (next) {
-                    User.create({ username: 'tag_poster' }, next);
+                    user.create({ username: 'tag_poster' }, next);
                 },
                 function (_uid, next) {
                     uid = _uid;
@@ -2524,7 +2543,7 @@ describe('Topic\'s', () => {
         before((done) => {
             async.waterfall([
                 function (next) {
-                    User.create({ username: 'mergevictim' }, next);
+                    user.create({ username: 'mergevictim' }, next);
                 },
                 function (_uid, next) {
                     uid = _uid;
@@ -2759,7 +2778,7 @@ describe('Topic\'s', () => {
 
         it('should update poster\'s lastposttime with "action time"', async () => {
             // src/user/posts.js:56
-            const data = await User.getUsersFields([adminUid], ['lastposttime']);
+            const data = await user.getUsersFields([adminUid], ['lastposttime']);
             assert.notStrictEqual(data[0].lastposttime, topicData.lastposttime);
         });
 
@@ -2882,7 +2901,7 @@ describe('Topic\'s', () => {
         });
 
         it('should update poster\'s lastposttime after a ST published', async () => {
-            const data = await User.getUsersFields([adminUid], ['lastposttime']);
+            const data = await user.getUsersFields([adminUid], ['lastposttime']);
             assert.strictEqual(adminUid, topicData.uid);
             assert.strictEqual(data[0].lastposttime, topicData.lastposttime);
         });
