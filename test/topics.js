@@ -114,7 +114,7 @@ describe('Topic\'s', () => {
             });
         });
 
-        const studentUser = User.create({
+        const studentUser = user.create({
             username: 'student1',
             password: 'pass',
             userslug: 'student1',
@@ -125,7 +125,7 @@ describe('Topic\'s', () => {
             status: 'online',
         });
 
-        const teacherUser = User.create({
+        const teacherUser = user.create({
             username: 'teacher1',
             password: 'pass',
             userslug: 'teacher1',
