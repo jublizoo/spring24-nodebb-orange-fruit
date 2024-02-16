@@ -36,6 +36,8 @@ describe('Topic\'s', () => {
     let adminJar;
     let csrf_token;
     let fooUid;
+    let announcementObj;
+    let generalObj;
 
     before(async () => {
         adminUid = await user.create({ username: 'admin', password: '123456' });
@@ -44,6 +46,17 @@ describe('Topic\'s', () => {
         const adminLogin = await helpers.loginUser('admin', '123456');
         adminJar = adminLogin.jar;
         csrf_token = adminLogin.csrf_token;
+
+        announcementObj = await categories.create({
+            name: 'Announcements',
+            description: 'Irrelevant',
+        });
+
+        generalObj = await categories.create({
+            name: 'General',
+            description: 'Irrelevant',
+        });
+
 
         categoryObj = await categories.create({
             name: 'Test Category',
@@ -57,7 +70,7 @@ describe('Topic\'s', () => {
         };
     });
 
-    describe('.post', () => {
+    describe('.post', async () => {
         it('should fail to create topic with invalid data', async () => {
             try {
                 await apiTopics.create({ uid: 0 }, null);
@@ -100,6 +113,70 @@ describe('Topic\'s', () => {
                 done();
             });
         });
+
+        const studentUser = user.create({
+            username: 'student1',
+            password: 'pass',
+            userslug: 'student1',
+            accounttype: 'student',
+            email: 'student@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
+        });
+
+        const teacherUser = user.create({
+            username: 'teacher1',
+            password: 'pass',
+            userslug: 'teacher1',
+            accounttype: 'instructor',
+            email: 'teacher@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
+        });
+
+        await helpers.loginUser('student1', 'pass');
+
+        it('should fail to create new topic in announcements when the user is a student', (done) => {
+            topics.post({
+                uid: studentUser.uid,
+                title: topic.title,
+                content: topic.content,
+                cid: announcementObj.cid,
+            }, (err) => {
+                assert.equal(err.message, '[[error:no-privileges]]');
+                done();
+            });
+        });
+
+        it('should be able to create a new topic in general when the user is a student', (done) => {
+            topics.post({
+                uid: studentUser.uid,
+                title: topic.title,
+                content: topic.content,
+                cid: generalObj.cid,
+            }, (err) => {
+                assert.ifError(err);
+                done();
+            });
+        });
+
+        await helpers.loginUser('teacher1', 'pass');
+
+        it('should be able to create a new topic in announcements when the user is a teacher', (done) => {
+            topics.post({
+                uid: teacherUser.uid,
+                title: topic.title,
+                content: topic.content,
+                cid: generalObj.cid,
+            }, (err) => {
+                assert.ifError(err);
+                done();
+            });
+        });
+
+        const adminLogin = await helpers.loginUser('admin', '123456');
 
         it('should fail to create new topic with empty title', (done) => {
             topics.post({ uid: topic.userId, title: '', content: topic.content, cid: topic.categoryId }, (err) => {

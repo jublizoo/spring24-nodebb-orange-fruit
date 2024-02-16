@@ -2,7 +2,6 @@
 'use strict';
 
 const _ = require('lodash');
-
 const assert = require('assert');
 const db = require('../database');
 const utils = require('../utils');
@@ -15,6 +14,7 @@ const posts = require('../posts');
 const privileges = require('../privileges');
 const categories = require('../categories');
 const translator = require('../translator');
+
 
 module.exports = function (Topics) {
     Topics.create = async function (data) {
@@ -77,7 +77,52 @@ module.exports = function (Topics) {
         return topicData.tid;
     };
 
+    /*  @param data : {
+            uid : string | number
+            title: string,
+            tags? : string[],
+            content : string,
+            cid : string | number
+            fromQueue? : boolean,
+            req? : {ip : string}
+        }
+        @return {
+            postData : {
+                ip : string
+                tid : number,
+                user : User,
+                index: number,
+                isMain : boolean,
+            },
+            topicData : {
+                index : number,
+                cid : number,
+                unreplied : boolean,
+                mainPost? : {
+                    ip? : string
+                    tid : number,
+                    user : User,
+                    index: number,
+                    isMain : boolean,
+                },
+                scheduled : boolean
+            }
+        }
+    */
     Topics.post = async function (data) {
+        /*
+         * Ensure input types are correct. Some inputs change types across calls.
+         * Certain errors are expected when required data is not given, hence
+         * the option for types to be null/invalid in the type assertions.
+         */
+        assert(!data.uid || typeof data.uid === 'number' || typeof data.uid === 'string');
+        assert(!data.title || typeof data.title === 'string');
+        assert(!data.tags || typeof data.tags === 'object');
+        assert(!data.content || typeof data.content === 'string');
+        assert(!data.cid || typeof data.cid === 'number' || typeof data.cid === 'string');
+        assert(!data.fromQueue || typeof data.fromQueue === 'boolean');
+        assert(!data.req || !data.req.ip || typeof data.req.ip === 'string');
+
         data = await plugins.hooks.fire('filter:topic.post', data);
         const { uid } = data;
 
@@ -99,11 +144,26 @@ module.exports = function (Topics) {
             privileges.categories.can('topics:tag', data.cid, uid),
         ]);
 
+
         if (!categoryExists) {
             throw new Error('[[error:no-category]]');
         }
 
-        if (!canCreate || (!canTag && data.tags.length)) {
+        let isStudentAnnouncement = false;
+        if (uid && user.exists(uid)) {
+            const userInfo = await user.getUserField(uid, 'accounttype');
+            const category = await categories.getCategoryData(data.cid);
+
+            assert(typeof userInfo === 'string');
+            assert(category.hasOwnProperty('name'));
+            assert(typeof category.name === 'string');
+
+            const isStudent = (userInfo === 'student');
+            const isAnnouncement = (category.name === 'Announcements');
+            isStudentAnnouncement = isStudent && isAnnouncement;
+        }
+
+        if (!canCreate || isStudentAnnouncement || (!canTag && data.tags.length)) {
             throw new Error('[[error:no-privileges]]');
         }
 
@@ -149,6 +209,21 @@ module.exports = function (Topics) {
         if (parseInt(uid, 10) && !topicData.scheduled) {
             user.notifications.sendTopicNotificationToFollowers(uid, topicData, postData);
         }
+
+        assert(!postData.ip || typeof postData.ip === 'string');
+        assert(typeof postData.tid === 'number');
+        assert(typeof postData.user === 'object');
+        assert(typeof postData.index === 'number');
+        assert(typeof postData.isMain === 'boolean');
+        assert(typeof topicData.index === 'number');
+        assert(typeof topicData.cid === 'number');
+        assert(typeof topicData.unreplied === 'boolean');
+        assert(!topicData.mainPost.ip || typeof topicData.mainPost.ip === 'string');
+        assert(typeof topicData.mainPost.tid === 'number');
+        assert(typeof topicData.mainPost.user === 'object');
+        assert(typeof topicData.mainPost.index === 'number');
+        assert(typeof topicData.mainPost.isMain === 'boolean');
+        assert(typeof topicData.scheduled === 'boolean');
 
         return {
             topicData: topicData,
@@ -241,6 +316,7 @@ module.exports = function (Topics) {
         return postData;
     };
 
+    // This function adds relevant data to post data for a new post, utilizing the uid and tid from data
     async function onNewPost(postData, data) {
         const { tid } = postData;
         const { uid } = postData;
