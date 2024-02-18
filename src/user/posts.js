@@ -17,16 +17,17 @@ module.exports = function (User) {
         if (parseInt(uid, 10) === 0) {
             return;
         }
-        const [userData, isAdminOrMod] = await Promise.all([
+        const [userData, isAdminOrMod, isInstructorOrTA] = await Promise.all([
             User.getUserFields(uid, ['uid', 'mutedUntil', 'joindate', 'email', 'reputation'].concat([field])),
             privileges.categories.isAdminOrMod(cid, uid),
+            privileges.categories.isInstructorOrTA(uid),
         ]);
 
         if (!userData.uid) {
             throw new Error('[[error:no-user]]');
         }
 
-        if (isAdminOrMod) {
+        if (isAdminOrMod || isInstructorOrTA) {
             return;
         }
 
