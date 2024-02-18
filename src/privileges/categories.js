@@ -116,6 +116,14 @@ privsCategories.isAdminOrMod = async function (cid, uid) {
     return isAdmin || isMod;
 };
 
+privsCategories.isInstructorOrTA = async function (uid) {
+    const [isInstructor, isTA] = await Promise.all([
+        user.isInstructor(uid),
+        user.isTA(uid),
+    ]);
+    return isInstructor || isTA;
+}
+
 privsCategories.isUserAllowedTo = async function (privilege, cid, uid) {
     if ((Array.isArray(privilege) && !privilege.length) || (Array.isArray(cid) && !cid.length)) {
         return [];
