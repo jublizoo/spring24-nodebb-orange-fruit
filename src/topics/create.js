@@ -149,7 +149,9 @@ module.exports = function (Topics) {
             throw new Error('[[error:no-category]]');
         }
 
-        privileges.global.give(['ban'], [uid]);
+        console.log("abt to");
+        console.log(await db.getSortedSetRangeWithScores('users:joindate', 0, -1));
+        console.log("did it");
 
         let isStudentAnnouncement = false;
         if (uid && user.exists(uid)) {
