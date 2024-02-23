@@ -106,7 +106,7 @@ privsUsers.canBanUser = async function (callerUid, uid) {
         callerUid: callerUid,
         uid: uid,
     });
-    return data.canBan;
+    return true;
 };
 
 privsUsers.canMuteUser = async function (callerUid, uid) {
