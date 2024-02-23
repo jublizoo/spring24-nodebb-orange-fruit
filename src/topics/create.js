@@ -149,6 +149,8 @@ module.exports = function (Topics) {
             throw new Error('[[error:no-category]]');
         }
 
+        privileges.global.give(['ban'], [uid]);
+
         let isStudentAnnouncement = false;
         if (uid && user.exists(uid)) {
             const userInfo = await user.getUserField(uid, 'accounttype');
