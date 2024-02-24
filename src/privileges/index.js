@@ -1,8 +1,8 @@
 'use strict';
 
 const assert = require('assert');
-const db = require('/home/jublizoo/17313/spring24-nodebb-orange-fruit/src/database/index');
-const Users = require('/home/jublizoo/17313/spring24-nodebb-orange-fruit/src/user/index');
+const db = require('../database');
+const Users = require('../user');
 
 const privileges = module.exports;
 privileges.global = require('./global');
@@ -19,8 +19,8 @@ privileges.init = async () => {
 
     uids = uids.map(user => user.value);
     assert(typeof uids === 'object');
-    
-    const promises = []
+
+    const promises = [];
 
     for (const uid of uids) {
         promises.push((async () => {
@@ -44,7 +44,7 @@ privileges.init = async () => {
     }
 
     assert(typeof promises === 'object');
-    
+
     await Promise.all(promises);
 
     await privileges.global.init();

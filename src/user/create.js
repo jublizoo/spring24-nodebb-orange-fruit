@@ -11,12 +11,11 @@ const plugins = require('../plugins');
 const groups = require('../groups');
 const meta = require('../meta');
 const analytics = require('../analytics');
-const privileges = require('/home/jublizoo/17313/spring24-nodebb-orange-fruit/src/privileges/index.js');
-const password = require('./password');
-const { isIn } = require('validator');
+const privileges = require('../privileges');
+// const password = require('./password');
+// const { isIn } = require('validator');
 
 module.exports = function (User) {
-    
     User.create = async function (data) {
         data.username = data.username.trim();
         data.userslug = slugify(data.username);
@@ -51,9 +50,9 @@ module.exports = function (User) {
     /*  @param data : {
             username : string
             userslug : string
-            accounttype : string
-            email : string
-            picture : 
+            accounttype? : string
+            email? : string
+            picture :
             fullname :
             location :
             birthay :
@@ -62,8 +61,8 @@ module.exports = function (User) {
         @return uid : number
     */
     async function create(data) {
-        assert(!data.username || typeof data.username === 'string');
-        assert(!data.userslug || typeof data.userslug === 'string');
+        assert(typeof data.username === 'string');
+        assert(typeof data.userslug === 'string');
         assert(!data.accounttype ||typeof data.accounttype === 'string');
         assert(!data.email || typeof data.email === 'string');
         assert(!data.password || typeof data.password === 'string');
