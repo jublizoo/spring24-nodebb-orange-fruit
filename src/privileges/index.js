@@ -24,7 +24,7 @@ privileges.init = async () => {
 
     for (const uid of uids) {
         promises.push((async () => {
-            assert(typeof uid === 'number');
+            assert(typeof uid === 'string');
 
             const userInfo = await Users.getUserField(uid, 'accounttype');
             const isTA = (userInfo === 'TA');

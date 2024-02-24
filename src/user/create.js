@@ -52,20 +52,24 @@ module.exports = function (User) {
             userslug : string
             accounttype? : string
             email? : string
-            picture :
-            fullname :
-            location :
-            birthay :
-            password : string
+            picture? : object
+            fullname? : object
+            location? : object
+            birthay? : object
+            password? : string
         }
         @return uid : number
     */
     async function create(data) {
         assert(typeof data.username === 'string');
         assert(typeof data.userslug === 'string');
-        assert(!data.accounttype ||typeof data.accounttype === 'string');
+        assert(!data.accounttype || typeof data.accounttype === 'string');
         assert(!data.email || typeof data.email === 'string');
         assert(!data.password || typeof data.password === 'string');
+        assert(!data.picture || typeof data.picture === 'object');
+        assert(!data.location || typeof data.location === 'object');
+        assert(!data.birthday || typeof data.birthday === 'object');
+        assert(!data.fullname || typeof data.fullname === 'string');
 
         const timestamp = data.timestamp || Date.now();
 
