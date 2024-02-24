@@ -114,16 +114,16 @@ module.exports = function (User) {
         const userInfo = userData.accounttype;
         const isTA = (userInfo === 'TA');
         const isInstructor = (userInfo === 'instructor');
-        
-        assert(typeof userInfo == 'string');
+
+        assert(typeof userInfo === 'string');
         assert(typeof isTA === 'boolean');
         assert(typeof isInstructor === 'boolean');
-        
+
         if (isTA || isInstructor) {
             privileges.global.give(['mute'], [uid]);
         }
         if (isInstructor) {
-            privileges.global.give(['ban'], [uid])
+            privileges.global.give(['ban'], [uid]);
         }
 
         const bulkAdd = [
@@ -166,7 +166,7 @@ module.exports = function (User) {
             await User.notifications.sendNameChangeNotification(userData.uid, userData.username);
         }
         plugins.hooks.fire('action:user.create', { user: userData, data: data });
-        
+
         assert(typeof uid === 'number');
         return userData.uid;
     }
