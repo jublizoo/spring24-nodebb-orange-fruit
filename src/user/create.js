@@ -3,6 +3,7 @@
 const zxcvbn = require('zxcvbn');
 const winston = require('winston');
 
+const assert = require('assert');
 const db = require('../database');
 const utils = require('../utils');
 const slugify = require('../slugify');
@@ -11,8 +12,8 @@ const groups = require('../groups');
 const meta = require('../meta');
 const analytics = require('../analytics');
 const privileges = require('/home/jublizoo/17313/spring24-nodebb-orange-fruit/src/privileges/index.js');
-const { assert } = require('../middleware');
 const password = require('./password');
+const { isIn } = require('validator');
 
 module.exports = function (User) {
     
@@ -48,7 +49,6 @@ module.exports = function (User) {
     }
 
     /*  @param data : {
-            uid : number
             username : string
             userslug : string
             accounttype : string
@@ -62,12 +62,11 @@ module.exports = function (User) {
         @return uid : number
     */
     async function create(data) {
-        assert(typeof uid === 'number');
-        assert(typeof username === 'string');
-        assert(typeof userslug === 'string');
-        assert(typeof accounttype === 'string');
-        assert(typeof email === 'string');
-        assert(typeof password === 'string');
+        assert(!data.username || typeof data.username === 'string');
+        assert(!data.userslug || typeof data.userslug === 'string');
+        assert(!data.accounttype ||typeof data.accounttype === 'string');
+        assert(!data.email || typeof data.email === 'string');
+        assert(!data.password || typeof data.password === 'string');
 
         const timestamp = data.timestamp || Date.now();
 
@@ -108,9 +107,14 @@ module.exports = function (User) {
 
         await db.setObject(`user:${uid}`, userData);
 
+        assert(typeof uid === 'number');
         const userInfo = userData.accounttype;
         const isTA = (userInfo === 'TA');
         const isInstructor = (userInfo === 'instructor');
+        
+        assert(typeof userInfo == 'string');
+        assert(typeof isTA === 'boolean');
+        assert(typeof isInstructor === 'boolean');
         
         if (isTA || isInstructor) {
             privileges.global.give(['mute'], [uid]);
