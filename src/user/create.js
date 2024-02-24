@@ -10,8 +10,12 @@ const plugins = require('../plugins');
 const groups = require('../groups');
 const meta = require('../meta');
 const analytics = require('../analytics');
+const privileges = require('/home/jublizoo/17313/spring24-nodebb-orange-fruit/src/privileges/index.js');
+const { assert } = require('../middleware');
+const password = require('./password');
 
 module.exports = function (User) {
+    
     User.create = async function (data) {
         data.username = data.username.trim();
         data.userslug = slugify(data.username);
@@ -43,7 +47,28 @@ module.exports = function (User) {
         }
     }
 
+    /*  @param data : {
+            uid : number
+            username : string
+            userslug : string
+            accounttype : string
+            email : string
+            picture : 
+            fullname :
+            location :
+            birthay :
+            password : string
+        }
+        @return uid : number
+    */
     async function create(data) {
+        assert(typeof uid === 'number');
+        assert(typeof username === 'string');
+        assert(typeof userslug === 'string');
+        assert(typeof accounttype === 'string');
+        assert(typeof email === 'string');
+        assert(typeof password === 'string');
+
         const timestamp = data.timestamp || Date.now();
 
         let userData = {
@@ -82,6 +107,17 @@ module.exports = function (User) {
         userData.uid = uid;
 
         await db.setObject(`user:${uid}`, userData);
+
+        const userInfo = userData.accounttype;
+        const isTA = (userInfo === 'TA');
+        const isInstructor = (userInfo === 'instructor');
+        
+        if (isTA || isInstructor) {
+            privileges.global.give(['mute'], [uid]);
+        }
+        if (isInstructor) {
+            privileges.global.give(['ban'], [uid])
+        }
 
         const bulkAdd = [
             ['username:uid', userData.uid, userData.username],
@@ -123,6 +159,8 @@ module.exports = function (User) {
             await User.notifications.sendNameChangeNotification(userData.uid, userData.username);
         }
         plugins.hooks.fire('action:user.create', { user: userData, data: data });
+        
+        assert(typeof uid === 'number');
         return userData.uid;
     }
 

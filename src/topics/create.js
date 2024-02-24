@@ -149,10 +149,6 @@ module.exports = function (Topics) {
             throw new Error('[[error:no-category]]');
         }
 
-        console.log("abt to");
-        console.log(await db.getSortedSetRangeWithScores('users:joindate', 0, -1));
-        console.log("did it");
-
         let isStudentAnnouncement = false;
         if (uid && user.exists(uid)) {
             const userInfo = await user.getUserField(uid, 'accounttype');
