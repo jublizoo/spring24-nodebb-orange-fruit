@@ -2,6 +2,7 @@
 
 const _ = require('lodash');
 
+const assert = require('assert');
 const groups = require('../groups');
 const plugins = require('../plugins');
 const db = require('../database');
@@ -149,12 +150,28 @@ User.isAdministrator = async function (uid) {
     return await privileges.users.isAdministrator(uid);
 };
 
+/*  @param uid : number
+    @return isInstructor : boolean
+*/
 User.isInstructor = async function (uid) {
-    return await privileges.users.isInstructor(uid);
+    assert.strictEqual(typeof parseInt(uid, 10), 'number');
+
+    const isInstructor = await privileges.users.isInstructor(uid);
+
+    assert.strictEqual(typeof isInstructor, 'boolean');
+    return isInstructor;
 };
 
+/*  @param uid : number
+    @return isTA : boolean
+*/
 User.isTA = async function (uid) {
-    return await privileges.users.isTA(uid);
+    assert.strictEqual(typeof parseInt(uid, 10), 'number');
+
+    const isTA = await privileges.users.isTA(uid);
+
+    assert.strictEqual(typeof isTA, 'boolean');
+    return isTA;
 };
 
 User.isGlobalModerator = async function (uid) {
