@@ -30,17 +30,53 @@ describe('User', () => {
     let userData;
     let testUid;
     let testCid;
-
+    let studentUser;
+    let teacherUser;
+    let taUser;
+    
     const plugins = require('../src/plugins');
 
     async function dummyEmailerHook(data) {
         // pretend to handle sending emails
     }
-    before((done) => {
+    before( async () => {
         // Attach an emailer hook so related requests do not error
         plugins.hooks.register('emailer-test', {
             hook: 'filter:email.send',
             method: dummyEmailerHook,
+        });
+
+        global.studentUser = await User.create({
+            username: 'student1',
+            password: 'password123',
+            userslug: 'student1',
+            accounttype: 'student',
+            email: 'student@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
+        });
+
+        global.teacherUser = await User.create({
+            username: 'teacher1',
+            password: 'password123',
+            userslug: 'teacher',
+            accounttype: 'instructor',
+            email: 'teacher@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
+        });
+
+        global.taUser = await User.create({
+            username: 'ta1',
+            password: 'password123',
+            userslug: 'ta',
+            accounttype: 'TA',
+            email: 'ta@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
         });
 
         Categories.create({
@@ -53,14 +89,14 @@ describe('User', () => {
             }
 
             testCid = categoryObj.cid;
-            done();
+            //done();
         });
     });
     after(() => {
         plugins.hooks.unregister('emailer-test', 'filter:email.send');
     });
 
-    beforeEach(() => {
+    beforeEach(async () => {        
         userData = {
             username: 'John Smith',
             fullname: 'John Smith McNamara',
@@ -1485,72 +1521,37 @@ describe('User', () => {
             assert.strictEqual(result.topicData.title, 'banned topic');
         });
 
-        for (let i = 0; i < 20; i++) {
-            console.log('poop');
-        }
-
-        const studentUser = User.create({
-            username: 'student1',
-            password: 'pass',
-            userslug: 'student1',
-            accounttype: 'student',
-            email: 'student@gmail.com',
-            joindate: null,
-            lastonline: null,
-            status: 'online',
-        });
-
-        const teacherUser = User.create({
-            username: 'teacher1',
-            password: 'pass',
-            userslug: 'teacher',
-            accounttype: 'instructor',
-            email: 'teacher@gmail.com',
-            joindate: null,
-            lastonline: null,
-            status: 'online',
-        });
-
-        const taUser = User.create({
-            username: 'ta1',
-            password: 'pass',
-            userslug: 'ta',
-            accounttype: 'TA',
-            email: 'ta@gmail.com',
-            joindate: null,
-            lastonline: null,
-            status: 'online',
-        });
-
-        helpers.loginUser('teacher1', 'pass');
-        console.log('about to run test');
-
         it('can ban user as a teacher', async () => {
-            await privileges.users.canBanUser(teacherUser.uid, teacherUser.uid);
+            for (let i = 0; i < 10; i++) console.log('about to run test');
+            await helpers.loginUser('teacher1', 'password123');
+            console.log(global.teacherUser);
+            assert(await privileges.global.can('ban', global.teacherUser));
+            assert(await privileges.users.canBanUser(global.teacherUser, global.studentUser));
         });
         
         it('can mute user as a teacher', async () => {
-            //assert(await privileges.users.canMuteUser(teacherUser.uid, studentUser.uid));
+            helpers.loginUser('teacher1', 'password123');
+            assert(await privileges.users.canMuteUser(global.teacherUser, global.studentUser));
         });
 
-        helpers.loginUser('ta1', 'pass');
-
         it('cant ban user as a TA', async () => {
-            //assert(!await privileges.users.canBanUser(taUser.uid, studentUser.uid));
+            await helpers.loginUser('ta1', 'password123');
+            assert(!await privileges.users.canBanUser(taUser, studentUser));
         });
         
         it('can mute user as a TA', async () => {
-            //assert(await privileges.users.canMuteUser(taUser.uid, studentUser.uid));
+            await helpers.loginUser('ta1', 'password123');
+            assert(await privileges.users.canMuteUser(taUser, studentUser));
         });
 
-        helpers.loginUser('student1', 'pass');
-
         it('cant ban user as a student', async () => {
-            //assert(!await privileges.users.canBanUser(studentUser.uid, studentUser.uid));
+            await helpers.loginUser('student1', 'password123');
+            assert(!await privileges.users.canBanUser(studentUser, studentUser));
         });
 
         it('cant mute user as a student', async () => {
-            //assert(!await privileges.users.canMuteUser(studentUser.uid, studentUser.uid));
+            helpers.loginUser('student1', 'password123');
+            assert(!await privileges.users.canMuteUser(studentUser, studentUser));
         }) 
     });
 
