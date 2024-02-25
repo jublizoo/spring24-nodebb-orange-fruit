@@ -13,12 +13,12 @@ const privsUsers = module.exports;
 
 privsUsers.isInstructor = async function (uid) {
     const accountType = await user.getUserField(uid, 'accounttype');
-    return accountType == 'instructor'
+    return accountType === 'instructor';
 };
 
 privsUsers.isTA = async function (uid) {
-  const accountType = await user.getUserField(uid, 'accounttype');
-  return accountType == 'TA'
+    const accountType = await user.getUserField(uid, 'accounttype');
+    return accountType === 'TA';
 };
 
 privsUsers.isAdministrator = async function (uid) {

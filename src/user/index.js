@@ -150,12 +150,12 @@ User.isAdministrator = async function (uid) {
 };
 
 User.isInstructor = async function (uid) {
-  return await privileges.users.isInstructor(uid);
-}
+    return await privileges.users.isInstructor(uid);
+};
 
 User.isTA = async function (uid) {
-  return await privileges.users.isTA(uid);
-}
+    return await privileges.users.isTA(uid);
+};
 
 User.isGlobalModerator = async function (uid) {
     return await privileges.users.isGlobalModerator(uid);

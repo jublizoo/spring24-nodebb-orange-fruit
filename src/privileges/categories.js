@@ -122,7 +122,7 @@ privsCategories.isInstructorOrTA = async function (uid) {
         user.isTA(uid),
     ]);
     return isInstructor || isTA;
-}
+};
 
 privsCategories.isUserAllowedTo = async function (privilege, cid, uid) {
     if ((Array.isArray(privilege) && !privilege.length) || (Array.isArray(cid) && !cid.length)) {
