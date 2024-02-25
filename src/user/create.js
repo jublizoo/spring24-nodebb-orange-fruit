@@ -121,7 +121,7 @@ module.exports = function (User) {
         assert(typeof isInstructor === 'boolean');
 
         if (isTA || isInstructor) {
-            await privileges.global.give(['mute'], [uid]); 
+            await privileges.global.give(['mute'], [uid]);
         }
         if (isInstructor) {
             await privileges.global.give(['ban'], [uid]);

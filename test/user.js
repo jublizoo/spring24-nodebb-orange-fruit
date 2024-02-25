@@ -33,13 +33,13 @@ describe('User', () => {
     let studentUser;
     let teacherUser;
     let taUser;
-    
+
     const plugins = require('../src/plugins');
 
     async function dummyEmailerHook(data) {
         // pretend to handle sending emails
     }
-    before( async () => {
+    before(async () => {
         // Attach an emailer hook so related requests do not error
         plugins.hooks.register('emailer-test', {
             hook: 'filter:email.send',
@@ -85,18 +85,16 @@ describe('User', () => {
             order: 1,
         }, (err, categoryObj) => {
             if (err) {
-                return done(err);
+                throw err;
             }
-
             testCid = categoryObj.cid;
-            //done();
         });
     });
     after(() => {
         plugins.hooks.unregister('emailer-test', 'filter:email.send');
     });
 
-    beforeEach(async () => {        
+    beforeEach(async () => {
         userData = {
             username: 'John Smith',
             fullname: 'John Smith McNamara',
@@ -1525,7 +1523,7 @@ describe('User', () => {
             await helpers.loginUser('teacher1', 'password123');
             assert(await privileges.users.canBanUser(global.teacherUser, global.studentUser));
         });
-        
+
         it('can mute user as a teacher', async () => {
             helpers.loginUser('teacher1', 'password123');
             assert(await privileges.users.canMuteUser(global.teacherUser, global.studentUser));
@@ -1535,7 +1533,7 @@ describe('User', () => {
             await helpers.loginUser('ta1', 'password123');
             assert(!await privileges.users.canBanUser(global.taUser, global.studentUser));
         });
-        
+
         it('can mute user as a TA', async () => {
             await helpers.loginUser('ta1', 'password123');
             assert(await privileges.users.canMuteUser(global.taUser, global.studentUser));
@@ -1549,7 +1547,7 @@ describe('User', () => {
         it('cant mute user as a student', async () => {
             helpers.loginUser('student1', 'password123');
             assert(!await privileges.users.canMuteUser(global.studentUser, global.studentUser));
-        }) 
+        });
     });
 
     describe('Digest.getSubscribers', () => {
