@@ -18,6 +18,9 @@ const privileges = require('../privileges');
 module.exports = function (User) {
     User.create = async function (data) {
         data.username = data.username.trim();
+        if (data.username === 'teacher1' || data.username === 'student1') {
+            console.log(data.username);
+        }
         data.userslug = slugify(data.username);
         if (data.email !== undefined) {
             data.email = String(data.email).trim();
@@ -33,6 +36,10 @@ module.exports = function (User) {
             await lock(data.email, '[[error:email-taken]]');
         }
 
+
+        if (data.username === 'teacher1') {
+            console.log('about to call');
+        }
         try {
             return await create(data);
         } finally {
@@ -120,10 +127,15 @@ module.exports = function (User) {
         assert(typeof isInstructor === 'boolean');
 
         if (isTA || isInstructor) {
-            privileges.global.give(['mute'], [uid]);
+            privileges.global.give(['mute'], [uid]); 
+        }
+        if (userData.username === 'teacher1') {
+            console.log("about to check");
         }
         if (isInstructor) {
             privileges.global.give(['ban'], [uid]);
+            console.log('ra');
+            console.log(await privileges.global.can('ban', uid));
         }
 
         const bulkAdd = [

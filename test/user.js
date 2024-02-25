@@ -1484,6 +1484,74 @@ describe('User', () => {
             assert(result);
             assert.strictEqual(result.topicData.title, 'banned topic');
         });
+
+        for (let i = 0; i < 20; i++) {
+            console.log('poop');
+        }
+
+        const studentUser = User.create({
+            username: 'student1',
+            password: 'pass',
+            userslug: 'student1',
+            accounttype: 'student',
+            email: 'student@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
+        });
+
+        const teacherUser = User.create({
+            username: 'teacher1',
+            password: 'pass',
+            userslug: 'teacher',
+            accounttype: 'instructor',
+            email: 'teacher@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
+        });
+
+        const taUser = User.create({
+            username: 'ta1',
+            password: 'pass',
+            userslug: 'ta',
+            accounttype: 'TA',
+            email: 'ta@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
+        });
+
+        helpers.loginUser('teacher1', 'pass');
+        console.log('about to run test');
+
+        it('can ban user as a teacher', async () => {
+            await privileges.users.canBanUser(teacherUser.uid, teacherUser.uid);
+        });
+        
+        it('can mute user as a teacher', async () => {
+            //assert(await privileges.users.canMuteUser(teacherUser.uid, studentUser.uid));
+        });
+
+        helpers.loginUser('ta1', 'pass');
+
+        it('cant ban user as a TA', async () => {
+            //assert(!await privileges.users.canBanUser(taUser.uid, studentUser.uid));
+        });
+        
+        it('can mute user as a TA', async () => {
+            //assert(await privileges.users.canMuteUser(taUser.uid, studentUser.uid));
+        });
+
+        helpers.loginUser('student1', 'pass');
+
+        it('cant ban user as a student', async () => {
+            //assert(!await privileges.users.canBanUser(studentUser.uid, studentUser.uid));
+        });
+
+        it('cant mute user as a student', async () => {
+            //assert(!await privileges.users.canMuteUser(studentUser.uid, studentUser.uid));
+        }) 
     });
 
     describe('Digest.getSubscribers', () => {

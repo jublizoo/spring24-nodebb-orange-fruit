@@ -101,6 +101,8 @@ privsUsers.canBanUser = async function (callerUid, uid) {
         privsUsers.isAdministrator(uid),
     ]);
 
+    console.log(canBan);
+
     const data = await plugins.hooks.fire('filter:user.canBanUser', {
         canBan: canBan && !isTargetAdmin,
         callerUid: callerUid,
