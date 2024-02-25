@@ -1524,8 +1524,6 @@ describe('User', () => {
         it('can ban user as a teacher', async () => {
             for (let i = 0; i < 10; i++) console.log('about to run test');
             await helpers.loginUser('teacher1', 'password123');
-            console.log(global.teacherUser);
-            assert(await privileges.global.can('ban', global.teacherUser));
             assert(await privileges.users.canBanUser(global.teacherUser, global.studentUser));
         });
         
@@ -1536,22 +1534,22 @@ describe('User', () => {
 
         it('cant ban user as a TA', async () => {
             await helpers.loginUser('ta1', 'password123');
-            assert(!await privileges.users.canBanUser(taUser, studentUser));
+            assert(!await privileges.users.canBanUser(global.taUser, global.studentUser));
         });
         
         it('can mute user as a TA', async () => {
             await helpers.loginUser('ta1', 'password123');
-            assert(await privileges.users.canMuteUser(taUser, studentUser));
+            assert(await privileges.users.canMuteUser(global.taUser, global.studentUser));
         });
 
         it('cant ban user as a student', async () => {
             await helpers.loginUser('student1', 'password123');
-            assert(!await privileges.users.canBanUser(studentUser, studentUser));
+            assert(!await privileges.users.canBanUser(global.studentUser, global.studentUser));
         });
 
         it('cant mute user as a student', async () => {
             helpers.loginUser('student1', 'password123');
-            assert(!await privileges.users.canMuteUser(studentUser, studentUser));
+            assert(!await privileges.users.canMuteUser(global.studentUser, global.studentUser));
         }) 
     });
 
