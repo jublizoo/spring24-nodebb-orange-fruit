@@ -1,5 +1,6 @@
 'use strict';
 
+const assert = require('assert');
 const db = require('../database');
 const meta = require('../meta');
 const privileges = require('../privileges');
@@ -13,7 +14,17 @@ module.exports = function (User) {
         await isReady(uid, cid, 'lastqueuetime');
     };
 
+    /*  @param uid : number
+        @param cid : number
+        @param field : string
+
+        @return Null
+    */
     async function isReady(uid, cid, field) {
+        assert.strictEqual(typeof parseInt(uid, 10), 'number');
+        assert.strictEqual(typeof parseInt(cid, 10), 'number');
+        assert.strictEqual(typeof field, 'string');
+
         if (parseInt(uid, 10) === 0) {
             return;
         }
