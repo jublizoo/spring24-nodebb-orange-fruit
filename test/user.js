@@ -1522,7 +1522,6 @@ describe('User', () => {
         });
 
         it('can ban user as a teacher', async () => {
-            for (let i = 0; i < 10; i++) console.log('about to run test');
             await helpers.loginUser('teacher1', 'password123');
             assert(await privileges.users.canBanUser(global.teacherUser, global.studentUser));
         });

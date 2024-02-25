@@ -125,8 +125,6 @@ module.exports = function (User) {
         }
         if (isInstructor) {
             await privileges.global.give(['ban'], [uid]);
-            console.log('uid is: ' + uid);
-            console.log(await privileges.global.can('ban', uid));
         }
 
         const bulkAdd = [
