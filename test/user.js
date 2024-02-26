@@ -279,6 +279,31 @@ describe('User', () => {
     });
 
     describe('.isReadyToPost()', () => {
+        let studentUid;
+        let instructorUid;
+        let TAUid;
+        let studentTopic;
+        let instructorTopic;
+        let TATopic;
+
+        before(async () => {
+            studentUid = await User.create({
+                username: 'student1',
+                accounttype: 'student',
+                lastposttime: 0,
+            });
+            instructorUid = await User.create({
+                username: 'instructor1',
+                accounttype: 'instructor',
+                lastposttime: 0,
+            });
+            TAUid = await User.create({
+                username: 'TA1',
+                accounttype: 'TA',
+                lastposttime: 0,
+            });
+        });
+
         it('should error when a user makes two posts in quick succession', (done) => {
             meta.config = meta.config || {};
             meta.config.postDelay = '10';
@@ -316,13 +341,13 @@ describe('User', () => {
             });
         });
 
-        it('should error when a new user posts if the last post time is 10 < 30 seconds', (done) => {
+        it('should error when a new student posts if the last post time is 10 < 30 seconds', (done) => {
             meta.config.newbiePostDelay = 30;
             meta.config.newbiePostDelayThreshold = 3;
 
-            User.setUserField(testUid, 'lastposttime', +new Date() - (20 * 1000), () => {
+            User.setUserField(studentUid, 'lastposttime', +new Date() - (20 * 1000), () => {
                 Topics.post({
-                    uid: testUid,
+                    uid: studentUid,
                     title: 'Topic 4',
                     content: 'lorem ipsum',
                     cid: testCid,
@@ -333,18 +358,54 @@ describe('User', () => {
             });
         });
 
-        it('should not error if a non-newbie user posts if the last post time is 10 < 30 seconds', (done) => {
-            User.setUserFields(testUid, {
+        it('should not error if a non-newbie student posts if the last post time is 10 < 30 seconds', (done) => {
+            User.setUserFields(studentUid, {
                 lastposttime: +new Date() - (20 * 1000),
                 reputation: 10,
             }, () => {
                 Topics.post({
-                    uid: testUid,
+                    uid: studentUid,
                     title: 'Topic 5',
                     content: 'lorem ipsum',
                     cid: testCid,
-                }, (err) => {
+                }, (err, res) => {
                     assert.ifError(err);
+                    studentTopic = res;
+                    done();
+                });
+            });
+        });
+
+        it('should not error if new instructor posts if the last post time is 10 < 30 seconds', (done) => {
+            User.setUserFields(instructorUid, {
+                lastposttime: +new Date() - (20 * 1000),
+            }, () => {
+                instructorTopic = Topics.post({
+                    uid: instructorUid,
+                    title: 'Topic 5',
+                    content: 'lorem ipsum',
+                    cid: testCid,
+                }, (err, res) => {
+                    assert.ifError(err);
+                    instructorTopic = res;
+                    done();
+                });
+            });
+        });
+
+        it('should not error if new TA posts if the last post time is 10 < 30 seconds', (done) => {
+            User.setUserFields(TAUid, {
+                lastposttime: +new Date() - (20 * 1000),
+                reputation: 0,
+            }, () => {
+                TATopic = Topics.post({
+                    uid: TAUid,
+                    title: 'Topic 5',
+                    content: 'lorem ipsum',
+                    cid: testCid,
+                }, (err, res) => {
+                    assert.ifError(err);
+                    TATopic = res;
                     done();
                 });
             });
@@ -370,6 +431,12 @@ describe('User', () => {
             const success = res.filter(res => res.value.code === 'ok');
             assert.strictEqual(failed.length, 9);
             assert.strictEqual(success.length, 1);
+        });
+
+        after(async () => {
+            await Topics.delete(studentTopic.topicData.tid, studentUid);
+            await Topics.delete(instructorTopic.topicData.tid, instructorUid);
+            await Topics.delete(TATopic.topicData.tid, TAUid);
         });
     });
 
