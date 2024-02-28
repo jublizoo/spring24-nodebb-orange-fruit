@@ -136,6 +136,17 @@ describe('Topic\'s', () => {
             status: 'online',
         });
 
+        const taUser = user.create({
+            username: 'teachassis1',
+            password: 'pass',
+            userslug: 'teachassis1',
+            accounttype: 'TA',
+            email: 'teachingassistant@gmail.com',
+            joindate: null,
+            lastonline: null,
+            status: 'online',
+        });
+
         await helpers.loginUser('student1', 'pass');
 
         it('should fail to create new topic in announcements when the user is a student', (done) => {
@@ -175,6 +186,21 @@ describe('Topic\'s', () => {
                 done();
             });
         });
+
+        await helpers.loginUser('teachassis1', 'pass');
+
+        it('should be able to create a new topic in announcements when the user is a TA', (done) => {
+            topics.post({
+                uid: taUser.uid,
+                title: topic.title,
+                content: topic.content,
+                cid: generalObj.cid,
+            }, (err) => {
+                assert.ifError(err);
+                done();
+            });
+        });
+
 
         const adminLogin = await helpers.loginUser('admin', '123456');
 
