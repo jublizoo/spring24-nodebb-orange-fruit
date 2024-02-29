@@ -813,6 +813,24 @@ describe('Post\'s', () => {
             assert.equal(parsedContent, `<a href="${nconf.get('base_url')}/users">test</a> <a href="//youtube.com">youtube</a> some test <img src="${nconf.get('base_url')}/path/to/img"/>`);
             done();
         });
+
+        if (meta.config.supportLaTeX) {
+            it('latex converted HTML should not contain $.$ expressions', (done) => {
+                const content = '<a href="/users">test</a> <a href="youtube.com">youtube</a> some test $2+2$ $sdhajkh + 2^4$ make $ all day <img src="/path/to/img"/>';
+                const texContent = posts.sanitize(content);
+                const inline = /\$(.*?)\$/g;
+                assert(!inline.test(texContent));
+                done();
+            });
+
+            it('latex converted HTML should not contain $.$ expressions', (done) => {
+                const content = '<a href="/users">test</a> <a href="youtube.com">youtube</a> some test $$2+2$$ $$sdhajkh + 2^4$$ make $ all day <img src="/path/to/img"/>';
+                const texContent = posts.sanitize(content);
+                const display = /\$\$(.*?)\$\$/g;
+                assert(!display.test(texContent));
+                done();
+            });
+        }
     });
 
     describe('socket methods', () => {

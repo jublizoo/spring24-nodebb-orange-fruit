@@ -5,7 +5,8 @@ const url = require('url');
 const winston = require('winston');
 const sanitize = require('sanitize-html');
 const _ = require('lodash');
-
+const assert = require('assert');
+const katex = require('katex');
 const meta = require('../meta');
 const plugins = require('../plugins');
 const translator = require('../translator');
@@ -108,12 +109,22 @@ module.exports = function (Posts) {
         return content;
     };
 
+    // (content: string) -> (clean: string)
     Posts.sanitize = function (content) {
-        return sanitize(content, {
+        assert.strictEqual(typeof content, 'string');
+        let clean = sanitize(content, {
             allowedTags: sanitizeConfig.allowedTags,
             allowedAttributes: sanitizeConfig.allowedAttributes,
             allowedClasses: sanitizeConfig.allowedClasses,
         });
+        if (meta.config.supportLaTeX) {
+            const display = /\$\$(.*?)\$\$/g;
+            const inline = /\$(.*?)\$/g;
+            clean = clean.replace(display, (_, tex) => katex.renderToString(tex, { displayMode: true }));
+            clean = clean.replace(inline, (_, tex) => katex.renderToString(tex, { displayMode: false }));
+        }
+        assert.strictEqual(typeof clean, 'string');
+        return clean;
     };
 
     Posts.configureSanitize = async () => {
