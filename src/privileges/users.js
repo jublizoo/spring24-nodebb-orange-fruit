@@ -3,6 +3,7 @@
 
 const _ = require('lodash');
 
+const assert = require('assert');
 const user = require('../user');
 const meta = require('../meta');
 const groups = require('../groups');
@@ -10,6 +11,32 @@ const plugins = require('../plugins');
 const helpers = require('./helpers');
 
 const privsUsers = module.exports;
+
+/*  @param uid : number
+    @return isInstructor : boolean
+*/
+privsUsers.isInstructor = async function (uid) {
+    assert.strictEqual(typeof parseInt(uid, 10), 'number');
+
+    const accountType = await user.getUserField(uid, 'accounttype');
+    const isInstructor = (accountType === 'instructor');
+
+    assert.strictEqual(typeof isInstructor, 'boolean');
+    return isInstructor;
+};
+
+/*  @param uid : number
+    @return isTA : boolean
+*/
+privsUsers.isTA = async function (uid) {
+    assert.strictEqual(typeof parseInt(uid, 10), 'number');
+
+    const accountType = await user.getUserField(uid, 'accounttype');
+    const isTA = (accountType === 'TA');
+
+    assert.strictEqual(typeof isTA, 'boolean');
+    return isTA;
+};
 
 privsUsers.isAdministrator = async function (uid) {
     return await isGroupMember(uid, 'administrators');

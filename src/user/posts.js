@@ -1,5 +1,6 @@
 'use strict';
 
+const assert = require('assert');
 const db = require('../database');
 const meta = require('../meta');
 const privileges = require('../privileges');
@@ -13,20 +14,31 @@ module.exports = function (User) {
         await isReady(uid, cid, 'lastqueuetime');
     };
 
+    /*  @param uid : number
+        @param cid : number
+        @param field : string
+
+        @return Null
+    */
     async function isReady(uid, cid, field) {
+        assert.strictEqual(typeof parseInt(uid, 10), 'number');
+        assert.strictEqual(typeof parseInt(cid, 10), 'number');
+        assert.strictEqual(typeof field, 'string');
+
         if (parseInt(uid, 10) === 0) {
             return;
         }
-        const [userData, isAdminOrMod] = await Promise.all([
+        const [userData, isAdminOrMod, isInstructorOrTA] = await Promise.all([
             User.getUserFields(uid, ['uid', 'mutedUntil', 'joindate', 'email', 'reputation'].concat([field])),
             privileges.categories.isAdminOrMod(cid, uid),
+            privileges.categories.isInstructorOrTA(uid),
         ]);
 
         if (!userData.uid) {
             throw new Error('[[error:no-user]]');
         }
 
-        if (isAdminOrMod) {
+        if (isAdminOrMod || isInstructorOrTA) {
             return;
         }
 
