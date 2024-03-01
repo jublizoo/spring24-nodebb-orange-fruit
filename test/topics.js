@@ -201,7 +201,6 @@ describe('Topic\'s', () => {
             });
         });
 
-
         const adminLogin = await helpers.loginUser('admin', '123456');
 
         it('should fail to create new topic with empty title', (done) => {
