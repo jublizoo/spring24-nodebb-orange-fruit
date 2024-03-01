@@ -46,7 +46,7 @@ This should be sufficient to check this feature. The KaTeX library will throw an
 
 To test this feature manually, build and run NodeBB (see readme), and craft a post (either create a new one or reply to an existing one).
 
-This feature supports two ways of rendering TeX: with either $.$-style statements for inline math, and $$.$$-style statements for display mode math. An example of the rendering is as follows:
+This feature supports two ways of rendering TeX: with either $`\$`$.$`\$`$-style statements for inline math, and $`\$\$`$.$`\$\$`$-style statements for display mode math. An example of the rendering is as follows:
 
 ![image](https://drive.google.com/uc?export=view&id=12u-D7R87uQfh9UR3l8kuFWGX3fKd6Rqs)
 
