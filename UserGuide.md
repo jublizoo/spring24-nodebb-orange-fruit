@@ -25,7 +25,7 @@ The testing suite includes test cases that create student, instructor, and TA ac
 # Feature: New TA account type which is displayed on profile and posts
 
 ## User Tests
-To test this feature automatically, see tests in [tests/topics.js](test/topics.js) on lines 139-149 and 190-204
+To test this feature automatically, see tests in [tests/topics.js](test/topics.js) on lines 139-149 and 190-204. This tests the creation of the account then also tests one permission (TA account can post announcements) to ensure that the account actually uses those permissions. This is sufficient because if no error was generated when making a TA account and testing it, the account type is valid and works.
 To test this feature manually, build and run NodeBB (see readme), and create an account of any type (you will be able to choose between a student, TA, and instructor account type). Then, create a post. There are two ways to view a user’s account type.
 
 ![image](https://drive.google.com/uc?export=view&id=1khswyh9GNdvvn3kVcvUJBd7dugnDzwwt)
