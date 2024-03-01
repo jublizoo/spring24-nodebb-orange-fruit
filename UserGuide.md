@@ -60,7 +60,7 @@ To test this feature automatically, run the tests in test/topics.js, by running 
 
 To test this feature manually, first create an account as a student. This can be done by clicking the register button on the homepage, following the directions to register, and choosing ‘student’ in the account type dropdown. Then, click the announcements category on the home page, and click ‘new topic.’ Filling out the post information and clicking ‘submit’ should cause a box to pop up with the message ‘You do not have enough privileges for this action.’ Following these same steps for the general category, however, should successfully create a post, with no such box. Then, click the circle in the top right hand corner, and click log out. Register again, this time with an instructor account type. Now, creating a post in announcements, or any other category, should be successful.
 
-# Feature: Instructors can mute and ban other users, and TAs can mute, but nto ban other users
+# Feature: Instructors can mute and ban other users, and TAs can mute, but not ban other users
 
 ## User tests
 To test this feature automatically, run the tests in test/topics.js, by running npx mocha test/user.js in the project directory. The tests and supplementary code for this feature are on lines 33 through 35, 49 through 80, and 1522 through 1550 of the test/topics.js file. There are a total of 6 test cases, testing the mute and ban permissions of the student, instructor, and TA account type. The only permissions changed were the ability to mute and ban users. Therefore, checking both of these permissions for all account types should be sufficient to test the correctness of the changes made.
