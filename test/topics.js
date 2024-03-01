@@ -114,6 +114,7 @@ describe('Topic\'s', () => {
             });
         });
 
+
         const studentUser = user.create({
             username: 'student1',
             password: 'pass',

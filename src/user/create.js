@@ -3,6 +3,7 @@
 const zxcvbn = require('zxcvbn');
 const winston = require('winston');
 
+const assert = require('assert');
 const db = require('../database');
 const utils = require('../utils');
 const slugify = require('../slugify');
@@ -10,6 +11,9 @@ const plugins = require('../plugins');
 const groups = require('../groups');
 const meta = require('../meta');
 const analytics = require('../analytics');
+const privileges = require('../privileges');
+// const password = require('./password');
+// const { isIn } = require('validator');
 
 module.exports = function (User) {
     User.create = async function (data) {
@@ -21,6 +25,7 @@ module.exports = function (User) {
         if (data['account-type'] !== undefined) {
             data.accounttype = data['account-type'].trim();
         }
+
 
         await User.isDataValid(data);
 
@@ -43,7 +48,30 @@ module.exports = function (User) {
         }
     }
 
+    /*  @param data : {
+            username : string
+            userslug : string
+            accounttype? : string
+            email? : string
+            picture? : object
+            fullname? : object
+            location? : object
+            birthay? : object
+            password? : string
+        }
+        @return uid : number
+    */
     async function create(data) {
+        assert(typeof data.username === 'string');
+        assert(typeof data.userslug === 'string');
+        assert(!data.accounttype || typeof data.accounttype === 'string');
+        assert(!data.email || typeof data.email === 'string');
+        assert(!data.password || typeof data.password === 'string');
+        assert(!data.picture || typeof data.picture === 'object');
+        assert(!data.location || typeof data.location === 'object');
+        assert(!data.birthday || typeof data.birthday === 'object');
+        assert(!data.fullname || typeof data.fullname === 'string');
+
         const timestamp = data.timestamp || Date.now();
 
         let userData = {
@@ -82,6 +110,22 @@ module.exports = function (User) {
         userData.uid = uid;
 
         await db.setObject(`user:${uid}`, userData);
+
+        assert(typeof uid === 'number');
+        const userInfo = userData.accounttype;
+        const isTA = (userInfo === 'TA');
+        const isInstructor = (userInfo === 'instructor');
+
+        assert(typeof userInfo === 'string');
+        assert(typeof isTA === 'boolean');
+        assert(typeof isInstructor === 'boolean');
+
+        if (isTA || isInstructor) {
+            await privileges.global.give(['mute'], [uid]);
+        }
+        if (isInstructor) {
+            await privileges.global.give(['ban'], [uid]);
+        }
 
         const bulkAdd = [
             ['username:uid', userData.uid, userData.username],
@@ -123,6 +167,8 @@ module.exports = function (User) {
             await User.notifications.sendNameChangeNotification(userData.uid, userData.username);
         }
         plugins.hooks.fire('action:user.create', { user: userData, data: data });
+
+        assert(typeof uid === 'number');
         return userData.uid;
     }
 
