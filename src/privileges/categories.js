@@ -3,6 +3,7 @@
 
 const _ = require('lodash');
 
+const assert = require('assert');
 const categories = require('../categories');
 const user = require('../user');
 const groups = require('../groups');
@@ -114,6 +115,22 @@ privsCategories.isAdminOrMod = async function (cid, uid) {
         user.isModerator(uid, cid),
     ]);
     return isAdmin || isMod;
+};
+
+/*  @param uid : number
+    @ return isInstructorOrTA : boolean
+*/
+privsCategories.isInstructorOrTA = async function (uid) {
+    assert.strictEqual(typeof parseInt(uid, 10), 'number');
+
+    const [isInstructor, isTA] = await Promise.all([
+        user.isInstructor(uid),
+        user.isTA(uid),
+    ]);
+    const isInstructorOrTA = (isInstructor || isTA);
+
+    assert.strictEqual(typeof isInstructorOrTA, 'boolean');
+    return isInstructorOrTA;
 };
 
 privsCategories.isUserAllowedTo = async function (privilege, cid, uid) {

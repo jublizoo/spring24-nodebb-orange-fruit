@@ -3,6 +3,7 @@
 <head>
     <title>{browserTitle}</title>
     {{{each metaTags}}}{function.buildMetaTag}{{{end}}}
+    <link rel="stylesheet" href="https://unpkg.com/katex@0.12.0/dist/katex.min.css" />
     <link rel="stylesheet" type="text/css" href="{relative_path}/assets/client{{{if bootswatchSkin}}}-{bootswatchSkin}{{{end}}}.css?{config.cache-buster}" />
     {{{each linkTags}}}{function.buildLinkTag}{{{end}}}
 
