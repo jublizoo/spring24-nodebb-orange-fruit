@@ -1,7 +1,7 @@
 
 'use strict';
 
-const Iroh = require("iroh");
+const Iroh = require('iroh');
 const _ = require('lodash');
 const assert = require('assert');
 const db = require('../database');
@@ -18,9 +18,7 @@ const translator = require('../translator');
 
 
 module.exports = function (Topics) {
-
     Topics.create = async function (data) {
-        console.log("here");
         // This is an internal method, consider using Topics.post instead
         const timestamp = data.timestamp || Date.now();
 
@@ -79,7 +77,7 @@ module.exports = function (Topics) {
         plugins.hooks.fire('action:topic.save', { topic: _.clone(topicData), data: data });
         return topicData.tid;
     };
-    
+
 
     /*  @param data : {
             uid : string | number
@@ -114,26 +112,29 @@ module.exports = function (Topics) {
         }
     */
     Topics.post = async function (data) {
-        let stage = new Iroh.Stage('Topics.create(data)');
+        const stage = new Iroh.Stage('Topics.create(data)');
 
-        let listener = stage.addListener(Iroh.CALL)
-        listener.on("before", (e) => {
-            console.log("Calling topics.create");
+        const listener = stage.addListener(Iroh.CALL);
+        listener.on('before', () => {
+            console.log('Calling topics.create');
         });
-        listener.on("after", (e) => {
-            console.log("Called topics.create");
+        listener.on('after', () => {
+            console.log('Called topics.create');
         });
-        
-        let stage2 = new Iroh.Stage('if (data.content) {data.content = utils.rtrim(data.content);}');
-        let loopListener = stage2.addListener(Iroh.IF);
-        loopListener.on("enter", (e) => {
-            console.log("Entering if");
+
+        const stage2 = new Iroh.Stage('if (data.content) {data.content = utils.rtrim(data.content);}');
+        const loopListener = stage2.addListener(Iroh.IF);
+        loopListener.on('enter', () => {
+            console.log('Entering if');
         });
-        loopListener.on("leave", (e) => {
-            console.log("Leaving if");
+        loopListener.on('leave', () => {
+            console.log('Leaving if');
         });
-        
+
+        // Next 2 lines must run, despite the linter saying it is unsafe.
+        // eslint-disable-next-line
         eval(stage.script);
+        // eslint-disable-next-line
         eval(stage2.script);
 
         /*
@@ -440,5 +441,4 @@ module.exports = function (Topics) {
             throw new Error('[[error:no-privileges]]');
         }
     }
-    
 };
