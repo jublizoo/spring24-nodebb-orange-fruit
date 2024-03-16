@@ -14,6 +14,7 @@ const utils = require('../utils');
 
 const backlinkRegex = new RegExp(`(?:${nconf.get('url').replace('/', '\\/')}|\b|\\s)\\/topic\\/(\\d+)(?:\\/\\w+)?`, 'g');
 
+
 module.exports = function (Topics) {
     Topics.onNewPostMade = async function (postData) {
         await Topics.updateLastPostTime(postData.tid, postData.timestamp);

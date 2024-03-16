@@ -1,6 +1,7 @@
 
 'use strict';
 
+const Iroh = require("iroh");
 const _ = require('lodash');
 const assert = require('assert');
 const db = require('../database');
@@ -17,6 +18,7 @@ const translator = require('../translator');
 
 
 module.exports = function (Topics) {
+
     Topics.create = async function (data) {
         // This is an internal method, consider using Topics.post instead
         const timestamp = data.timestamp || Date.now();
@@ -414,4 +416,5 @@ module.exports = function (Topics) {
             throw new Error('[[error:no-privileges]]');
         }
     }
+    
 };
