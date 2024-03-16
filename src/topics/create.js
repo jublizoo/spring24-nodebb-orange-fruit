@@ -20,6 +20,7 @@ const translator = require('../translator');
 module.exports = function (Topics) {
 
     Topics.create = async function (data) {
+        console.log("here");
         // This is an internal method, consider using Topics.post instead
         const timestamp = data.timestamp || Date.now();
 
@@ -78,6 +79,7 @@ module.exports = function (Topics) {
         plugins.hooks.fire('action:topic.save', { topic: _.clone(topicData), data: data });
         return topicData.tid;
     };
+    
 
     /*  @param data : {
             uid : string | number
@@ -112,6 +114,28 @@ module.exports = function (Topics) {
         }
     */
     Topics.post = async function (data) {
+        let stage = new Iroh.Stage('Topics.create(data)');
+
+        let listener = stage.addListener(Iroh.CALL)
+        listener.on("before", (e) => {
+            console.log("Calling topics.create");
+        });
+        listener.on("after", (e) => {
+            console.log("Called topics.create");
+        });
+        
+        let stage2 = new Iroh.Stage('if (data.content) {data.content = utils.rtrim(data.content);}');
+        let loopListener = stage2.addListener(Iroh.IF);
+        loopListener.on("enter", (e) => {
+            console.log("Entering if");
+        });
+        loopListener.on("leave", (e) => {
+            console.log("Leaving if");
+        });
+        
+        eval(stage.script);
+        eval(stage2.script);
+
         /*
          * Ensure input types are correct. Some inputs change types across calls.
          * Certain errors are expected when required data is not given, hence

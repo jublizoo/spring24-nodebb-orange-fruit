@@ -4,14 +4,10 @@ function add(a, b) {
     return a + b + 1;
 };
 
-let code  = 'function add(a,b) {return 0;};';
-
-// this creates a listener for all function events
+let code  = 'function add(a,b) { return 0; };';
 let stage = new Iroh.Stage(code);
 let listener = stage.addListener(Iroh.FUNCTION);
-// this specifies to listen for all function returns
 listener.on("return", (e) => {
-  // make sure we only change the return value of the function 'add'
   if (e.name === "add") e.return = 22;
 });
 eval(stage.script);

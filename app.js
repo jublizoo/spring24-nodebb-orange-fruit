@@ -47,19 +47,6 @@ prestart.setupWinston();
 prestart.versionCheck();
 winston.verbose('* using configuration stored in: %s', configFile);
 
-const Iroh = require('iroh');
-const topics = require('./src/topics');
-let code = topics.post.toString();
-console.log("code");
-console.log(code);
-let stage = new Iroh.Stage(code);
-let listener = stage.addListener(Iroh.FUNCTION);
-//this specifies to listen for all function returns
-listener.on("enter", (e) => {
-    //make sure we only change the return value of the function 'add'
-    console.log("21");
-});
-
 if (!process.send) {
     // If run using `node app`, log GNU copyright info along with server info
     winston.info(`NodeBB v${nconf.get('version')} Copyright (C) 2013-${(new Date()).getFullYear()} NodeBB Inc.`);
