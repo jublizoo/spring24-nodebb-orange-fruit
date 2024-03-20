@@ -10,11 +10,14 @@ ARG NODE_ENV
 ENV NODE_ENV $NODE_ENV
 
 COPY --chown=node:node . /usr/src/app
+COPY --chown=node:node install/package.json /usr/src/app/package.json
 
 USER node
 
 RUN npm install && \
     npm cache clean --force
+
+
 
 ENV NODE_ENV=production \
     daemon=false \
