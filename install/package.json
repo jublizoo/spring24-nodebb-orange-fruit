@@ -15,7 +15,8 @@
         "test": "npx tsc && nyc --reporter=html --reporter=text-summary mocha",
         "coverage": "nyc report --reporter=text-lcov > ./coverage/lcov.info",
         "coveralls": "nyc report --reporter=text-lcov | coveralls && rm -r coverage",
-        "flow": "flow"
+        "flow": "flow",
+        "prepublish": "./node_modules/.bin/flow-remove-types lib/ -p -d src/"
     },
     "nyc": {
         "exclude": [
