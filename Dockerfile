@@ -9,14 +9,12 @@ RUN apt-get update && apt-get install -y jq
 ARG NODE_ENV
 ENV NODE_ENV $NODE_ENV
 
-COPY --chown=node:node install/package.json /usr/src/app/package.json
+COPY --chown=node:node . /usr/src/app
 
 USER node
 
 RUN npm install && \
     npm cache clean --force
-
-COPY --chown=node:node . /usr/src/app
 
 ENV NODE_ENV=production \
     daemon=false \
